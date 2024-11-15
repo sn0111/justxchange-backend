@@ -5,6 +5,9 @@ import routes from './api/routes';
 import cors from 'cors';
 import morgan from 'morgan';
 import logger from './config/Logger';
+import { verifyToken } from './api/services/auth.service';
+import { exceptionMsger } from './api/utils/exceptionMsger';
+import { errorHandler } from './api/utils/errorHandler';
 
 const swaggerDocument = require('./api/docs/swagger-output.json');
 const swaggerUi = require('swagger-ui-express');
@@ -25,11 +28,39 @@ const corsOptions = {
 
 // Use CORS middleware
 app.use(cors(corsOptions));
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }));
+// app.use(bodyParser.urlencoded({ extended: true }));
 app.use(
     morgan(':method :url :status :res[content-length] - :response-time ms'),
 );
+app.use((req, res, next) => {
+    const publicRoutes = [
+        '/login-user',
+        '/signup(/.*)?$',
+        '/verify-otp',
+        '/save-user',
+        '^/api-docs(/.*)?$',
+    ];
 
+    if (publicRoutes.some((pattern) => new RegExp(pattern).test(req.path))) {
+        return next();
+    }
+
+    const token = req.header('Authorization')?.split(' ')[1]; // "Bearer <token>"
+
+    if (!token) {
+        return res
+            .status(403)
+            .json(exceptionMsger('Access denied. No token provided.'));
+    }
+
+    try {
+        verifyToken(token);
+        next();
+    } catch (error) {
+        res.status(401).json(exceptionMsger('Invalid token.'));
+    }
+});
 // Middleware to log response body
 app.use((req, res, next) => {
     const originalSend = res.send;
@@ -42,6 +73,7 @@ app.use((req, res, next) => {
 // Routes
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use(routes);
+app.use(errorHandler);
 
 // Error handling middleware
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {

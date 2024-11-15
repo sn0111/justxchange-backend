@@ -52,7 +52,7 @@ export const userService = {
             }
 
             if (user.otp !== otp) {
-                throw new Error('Ivalid Otp');
+                throw new Error('Invalid Otp');
             }
 
             if (user.otpExpiry && user.otpExpiry < new Date()) {
@@ -119,8 +119,11 @@ export const userService = {
                 throw new Error('Mobile number not verified');
             }
 
-            const hashedPassword = await hashPassword(body.password);
-            const isVerified = comparePassword(body.password, hashedPassword);
+            // const hashedPassword = await hashPassword(body.password);
+            const isVerified = await comparePassword(
+                body.password,
+                user.password || '',
+            );
 
             if (!isVerified) {
                 throw new Error('Invalid User password');

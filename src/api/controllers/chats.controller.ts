@@ -1,18 +1,18 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { chatService } from '../services';
 
 export const chatController = {
-    createChat: async (req: Request, res: Response) => {
+    createChat: async (req: Request, res: Response, next: NextFunction) => {
         const { productId, buyerId } = req.body;
         try {
             const chat = await chatService.createChat(productId, buyerId);
             res.status(201).json(chat);
         } catch (error) {
-            res.status(400).json({ error: error });
+            next(error);
         }
     },
 
-    sendMessage: async (req: Request, res: Response) => {
+    sendMessage: async (req: Request, res: Response, next: NextFunction) => {
         const { chatId, userId, messageText } = req.body;
         try {
             const message = await chatService.addMessage(
@@ -22,27 +22,31 @@ export const chatController = {
             );
             res.status(201).json(message);
         } catch (error) {
-            res.status(400).json({ error: error });
+            next(error);
         }
     },
 
-    getChatMessages: async (req: Request, res: Response)=> {
+    getChatMessages: async (
+        req: Request,
+        res: Response,
+        next: NextFunction,
+    ) => {
         const { chatId } = req.params;
         try {
             const messages = await chatService.getChatMessages(Number(chatId));
             res.status(200).json(messages);
         } catch (error) {
-            res.status(404).json({ error: 'Chat not found' });
+            next(error);
         }
     },
 
-    getUserChats: async(req: Request, res: Response)=> {
+    getUserChats: async (req: Request, res: Response, next: NextFunction) => {
         const { userId } = req.params;
         try {
             const chats = await chatService.getUserChats(Number(userId));
             res.status(200).json(chats);
         } catch (error) {
-            res.status(404).json({ error: error });
+            next(error);
         }
     },
 };

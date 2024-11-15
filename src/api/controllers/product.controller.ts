@@ -1,5 +1,5 @@
 // src/controllers/productController.ts
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { productService } from '../services';
 import { IProduct } from '../interfaces/product';
 import productSchema from '../validators/product.validator';
@@ -7,7 +7,7 @@ import { exceptionMsger } from '../utils/exceptionMsger';
 
 export const productController = {
     // Create a new product
-    createProduct: async (req: Request, res: Response) => {
+    createProduct: async (req: Request, res: Response, next: NextFunction) => {
         /* #swagger.responses[200] = {
         schema: {
             message: 'Product created successfully',
@@ -33,20 +33,12 @@ export const productController = {
                 data: product,
             });
         } catch (err: any) {
-            if (err.isJoi) {
-                // Handle Joi validation errors
-                const message = err.details
-                    ? err.details[0].message
-                    : 'Validation error';
-                return res.status(400).json({ error: message });
-            }
-            // Handle general server errors
-            res.status(500).json(exceptionMsger(err.message || 'Server error'));
+            next(err);
         }
     },
 
     // Get all products
-    getAllProducts: async (req: Request, res: Response) => {
+    getAllProducts: async (req: Request, res: Response, next: NextFunction) => {
         /* #swagger.responses[200] = {
             schema: {
                 data: [
@@ -58,12 +50,12 @@ export const productController = {
             const products = await productService.getAll();
             res.json({ data: products });
         } catch (err) {
-            res.status(500).json(exceptionMsger(err));
+            next(err);
         }
     },
 
     // Get a product by ID
-    getProductById: async (req: Request, res: Response) => {
+    getProductById: async (req: Request, res: Response, next: NextFunction) => {
         /* #swagger.responses[200] = {
             schema: {
                 data: 
@@ -81,12 +73,12 @@ export const productController = {
                     .json(exceptionMsger('Product not found'));
             res.json({ data: product });
         } catch (err) {
-            res.status(500).json(exceptionMsger(err));
+            next(err);
         }
     },
 
     // Update a product by ID
-    updateProduct: async (req: Request, res: Response) => {
+    updateProduct: async (req: Request, res: Response, next: NextFunction) => {
         /* #swagger.responses[200] = {
             schema: {
                 message: 'Updated product successfully',
@@ -109,22 +101,25 @@ export const productController = {
                 data: product,
             });
         } catch (err) {
-            res.status(500).json(exceptionMsger(err));
+            next(err);
         }
     },
 
     // Delete a product by ID
-    deleteProduct: async (req: Request, res: Response) => {
+    deleteProduct: async (req: Request, res: Response, next: NextFunction) => {
         try {
             await productService.delete(Number(req.params.id));
             res.status(204).json({ message: 'Product deleted successfully' });
         } catch (err) {
-            const response = 'Product not found';
-            res.status(500).json(exceptionMsger(response));
+            next(err);
         }
     },
 
-    getByCategoryId: async (req: Request, res: Response) => {
+    getByCategoryId: async (
+        req: Request,
+        res: Response,
+        next: NextFunction,
+    ) => {
         try {
             const products: IProduct[] | [] =
                 await productService.getByCategoryId(
@@ -133,7 +128,7 @@ export const productController = {
 
             res.json({ data: products });
         } catch (err) {
-            res.status(500).json(exceptionMsger(err));
+            next(err);
         }
     },
 };

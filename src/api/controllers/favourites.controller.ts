@@ -1,8 +1,12 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { favouriteService } from '../services';
 
 export const favoriteController = {
-    addCategoryFavorite: async (req: Request, res: Response) => {
+    addCategoryFavorite: async (
+        req: Request,
+        res: Response,
+        next: NextFunction,
+    ) => {
         try {
             const userId = 1; // Assuming `req.user` holds authenticated user info
             const { categoryId } = req.body;
@@ -12,24 +16,30 @@ export const favoriteController = {
             );
             res.status(201).json(favorite);
         } catch (error) {
-            res.status(500).json({ error: 'Error adding category favorite' });
+            next(error);
         }
     },
 
-    getUserCategoryFavorites: async (req: Request, res: Response) => {
+    getUserCategoryFavorites: async (
+        req: Request,
+        res: Response,
+        next: NextFunction,
+    ) => {
         try {
             const userId = 1;
             const favorites =
                 await favouriteService.getUserCategoryFavorites(userId);
             res.status(200).json(favorites);
         } catch (error) {
-            res.status(500).json({
-                error: 'Error fetching category favorites',
-            });
+            next(error);
         }
     },
 
-    removeCategoryFavorite: async (req: Request, res: Response) => {
+    removeCategoryFavorite: async (
+        req: Request,
+        res: Response,
+        next: NextFunction,
+    ) => {
         try {
             const userId = 1;
             const { categoryId } = req.params;
@@ -39,11 +49,15 @@ export const favoriteController = {
             );
             res.status(204).send();
         } catch (error) {
-            res.status(500).json({ error: 'Error removing category favorite' });
+            next(error);
         }
     },
 
-    addProductFavorite: async (req: Request, res: Response) => {
+    addProductFavorite: async (
+        req: Request,
+        res: Response,
+        next: NextFunction,
+    ) => {
         try {
             const userId = 1;
             const { productId } = req.body;
@@ -53,22 +67,30 @@ export const favoriteController = {
             );
             res.status(201).json(favorite);
         } catch (error) {
-            res.status(500).json({ error: 'Error adding product favorite' });
+            next(error);
         }
     },
 
-    getUserProductFavorites: async (req: Request, res: Response) => {
+    getUserProductFavorites: async (
+        req: Request,
+        res: Response,
+        next: NextFunction,
+    ) => {
         try {
             const userId = 1;
             const favorites =
                 await favouriteService.getUserProductFavorites(userId);
             res.status(200).json(favorites);
         } catch (error) {
-            res.status(500).json({ error: 'Error fetching product favorites' });
+            next(error);
         }
     },
 
-    removeProductFavorite: async (req: Request, res: Response) => {
+    removeProductFavorite: async (
+        req: Request,
+        res: Response,
+        next: NextFunction,
+    ) => {
         try {
             const userId = 1;
             const { productId } = req.params;
@@ -78,7 +100,7 @@ export const favoriteController = {
             );
             res.status(204).send();
         } catch (error) {
-            res.status(500).json({ error: 'Error removing product favorite' });
+            next(error);
         }
     },
 };
