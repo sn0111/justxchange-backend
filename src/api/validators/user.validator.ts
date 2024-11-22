@@ -47,11 +47,8 @@ export const loginSchema = Joi.object({
 });
 
 export const mobileNumberSchema = Joi.object({
-    mobileNumber: Joi.string()
-        .pattern(/^\d{10}$/)
-        .required()
-        .messages({
-            'string.pattern.base': 'Mobile number must be a 10-digit number.',
-            'any.required': 'Mobile number is required.',
-        }),
+    mobileNumber: Joi.string().trim().required().messages({
+        'string.empty': 'Mobile number is required',
+        'any.required': 'Mobile number is required',
+    }),
 });

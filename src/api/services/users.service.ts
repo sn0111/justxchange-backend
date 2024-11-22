@@ -131,7 +131,7 @@ export const userService = {
 
             const token = generateToken(user.userId);
 
-            return { token };
+            return { token: token, userId: user.userId };
         } catch (error) {
             console.error('Error login user:', error);
             throw error;

@@ -1,4 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express';
+import http from 'http';
+import { Server } from 'socket.io';
 import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import routes from './api/routes';
@@ -8,9 +10,21 @@ import logger from './config/Logger';
 import { verifyToken } from './api/services/auth.service';
 import { exceptionMsger } from './api/utils/exceptionMsger';
 import { errorHandler } from './api/utils/errorHandler';
+import { chatService } from './api/services';
 
 const swaggerDocument = require('./api/docs/swagger-output.json');
 const swaggerUi = require('swagger-ui-express');
+
+declare global {
+    namespace Express {
+        interface Request {
+            user?: {
+                userId: string;
+                [key: string]: any;
+            };
+        }
+    }
+}
 
 dotenv.config();
 
@@ -40,6 +54,7 @@ app.use((req, res, next) => {
         '/verify-otp',
         '/save-user',
         '^/api-docs(/.*)?$',
+        '^/socket.io(/.*)?$',
     ];
 
     if (publicRoutes.some((pattern) => new RegExp(pattern).test(req.path))) {
@@ -55,7 +70,8 @@ app.use((req, res, next) => {
     }
 
     try {
-        verifyToken(token);
+        const tokenDetails = verifyToken(token);
+        req.user = tokenDetails;
         next();
     } catch (error) {
         res.status(401).json(exceptionMsger('Invalid token.'));
@@ -86,9 +102,38 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     logger.error(`Error occurred in ${req.method} ${req.url}: ${err.message}`);
     res.status(500).send('Internal Server Error');
 });
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: '*' } });
+
+io.on('connection', (socket) => {
+    console.log(`User connected: ${socket.id}`);
+
+    socket.on('join', (chatId: string) => {
+        socket.join(chatId);
+        console.log(`User ${chatId} joined room ${chatId}`);
+    });
+
+    socket.on('sendMessage', async (data) => {
+        const { chatId, userId, message } = data;
+
+        // Save message to DB via service
+        await chatService.addMessage(chatId, userId, message);
+
+        // Emit message to receiver
+        io.to(chatId).emit('receiveMessage', {
+            userId,
+            message,
+            timestamp: new Date(),
+        });
+    });
+
+    socket.on('disconnect', () => {
+        console.log(`User disconnected: ${socket.id}`);
+    });
+});
 
 // Initialize models and then start the server
 const PORT = process.env.PORT || 8090;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });

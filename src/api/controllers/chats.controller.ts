@@ -3,24 +3,27 @@ import { chatService } from '../services';
 
 export const chatController = {
     createChat: async (req: Request, res: Response, next: NextFunction) => {
-        const { productId, buyerId } = req.body;
+        const { productId } = req.body;
         try {
-            const chat = await chatService.createChat(productId, buyerId);
-            res.status(201).json(chat);
+            const chat = await chatService.createChat(
+                productId,
+                Number(req.user?.userId),
+            );
+            res.status(200).json({ data: chat });
         } catch (error) {
             next(error);
         }
     },
 
     sendMessage: async (req: Request, res: Response, next: NextFunction) => {
-        const { chatId, userId, messageText } = req.body;
+        const { chatId, messageText } = req.body;
         try {
             const message = await chatService.addMessage(
                 chatId,
-                userId,
+                Number(req.user?.userId),
                 messageText,
             );
-            res.status(201).json(message);
+            res.status(200).json(message);
         } catch (error) {
             next(error);
         }
@@ -41,10 +44,10 @@ export const chatController = {
     },
 
     getUserChats: async (req: Request, res: Response, next: NextFunction) => {
-        const { userId } = req.params;
+        const userId = req.user?.userId;
         try {
             const chats = await chatService.getUserChats(Number(userId));
-            res.status(200).json(chats);
+            res.status(200).json({ data: chats });
         } catch (error) {
             next(error);
         }

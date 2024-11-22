@@ -24,12 +24,25 @@ export const productService = {
 
     getAll: async () => {
         try {
-            const products: [] =
+            const products: IProduct[] =
                 await prisma.$queryRaw`SELECT * FROM "products" ORDER BY RANDOM() LIMIT 10`;
             if (!products.length) {
                 throw new NotFoundError('No products found');
             }
-            return products;
+            const formattedProducts: IProduct[] = products.map(
+                (product: any) => ({
+                    productId: product.product_id, // Ensure keys match the database mappings
+                    productName: product.product_name,
+                    description: product.description,
+                    amount: product.amount,
+                    categoryId: product.category_id,
+                    userId: product.user_id,
+                    images: product.images, // Prisma will parse JSON array fields correctly
+                    condition: product.condition,
+                }),
+            );
+
+            return formattedProducts;
         } catch (error) {
             logger.error('Error fetching all products:', error);
             throw error;

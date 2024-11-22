@@ -47,3 +47,103 @@
 2024-11-10 19:23:19 [INFO]: get all categories
 2024-11-10 19:51:26 [INFO]: get all categories
 2024-11-10 19:51:26 [INFO]: get all categories
+2024-11-10 21:51:57 [INFO]: get all categories
+2024-11-10 21:51:57 [INFO]: get all categories
+2024-11-10 22:10:37 [INFO]: get all categories
+2024-11-10 22:10:37 [INFO]: get all categories
+2024-11-10 22:11:21 [INFO]: get all categories
+2024-11-10 22:11:21 [INFO]: get all categories
+2024-11-10 22:11:37 [INFO]: get all categories
+2024-11-10 22:11:37 [INFO]: get all categories
+2024-11-10 22:13:20 [INFO]: get all categories
+2024-11-10 22:13:20 [INFO]: get all categories
+2024-11-10 22:14:13 [INFO]: get all categories
+2024-11-10 22:14:13 [INFO]: get all categories
+2024-11-10 22:16:32 [INFO]: get all categories
+2024-11-10 22:18:15 [INFO]: get all categories
+2024-11-10 22:18:15 [INFO]: get all categories
+2024-11-10 22:22:24 [INFO]: get all categories
+2024-11-10 22:22:24 [INFO]: get all categories
+2024-11-10 22:23:27 [INFO]: get all categories
+2024-11-10 22:23:27 [INFO]: get all categories
+2024-11-11 22:15:08 [INFO]: get all categories
+2024-11-11 22:15:08 [INFO]: get all categories
+2024-11-11 22:54:21 [INFO]: get all categories
+2024-11-11 22:54:21 [INFO]: get all categories
+2024-11-13 23:48:26 [INFO]: get all categories
+2024-11-13 23:48:27 [INFO]: get all categories
+2024-11-13 23:49:28 [INFO]: get all categories
+2024-11-13 23:49:28 [INFO]: get all categories
+2024-11-13 23:49:38 [ERROR]: Error occurred in POST /login-user: Cannot set headers after they are sent to the client
+2024-11-13 23:49:43 [ERROR]: Error occurred in POST /login-user: Cannot set headers after they are sent to the client
+2024-11-13 23:51:05 [ERROR]: Error occurred in POST /login-user: Cannot set headers after they are sent to the client
+2024-11-13 23:53:52 [ERROR]: Error occurred in POST /login-user: Cannot set headers after they are sent to the client
+2024-11-18 23:27:05 [INFO]: Fetching all categories
+2024-11-18 23:27:05 [INFO]: Fetching all categories
+2024-11-18 23:28:04 [INFO]: Fetching all categories
+2024-11-18 23:28:04 [INFO]: Fetching all categories
+2024-11-18 23:30:28 [INFO]: Fetching all categories
+2024-11-18 23:30:28 [INFO]: Fetching all categories
+2024-11-18 23:31:16 [INFO]: Fetching all categories
+2024-11-18 23:31:16 [INFO]: Fetching all categories
+2024-11-18 23:32:14 [INFO]: Fetching all categories
+2024-11-18 23:32:14 [INFO]: Fetching all categories
+2024-11-18 23:36:40 [INFO]: Fetching all categories
+2024-11-18 23:36:40 [INFO]: Fetching all categories
+2024-11-18 23:39:25 [INFO]: Fetching all categories
+2024-11-18 23:39:25 [INFO]: Fetching all categories
+2024-11-18 23:39:43 [INFO]: Fetching all categories
+2024-11-18 23:39:43 [INFO]: Fetching all categories
+2024-11-18 23:42:36 [INFO]: Fetching all categories
+2024-11-18 23:42:36 [INFO]: Fetching all categories
+2024-11-19 19:20:39 [INFO]: Fetching all categories
+2024-11-19 19:20:39 [INFO]: Fetching all categories
+2024-11-19 21:42:24 [INFO]: Fetching all categories
+2024-11-19 21:42:24 [INFO]: Fetching all categories
+2024-11-19 22:30:34 [ERROR]: Error fetching product by ID 2: 
+Invalid `prisma.product.findUnique()` invocation in
+/home/D/workspace/personal/justxchange-backend/src/api/services/product.service.ts:58:50
+
+  55 }
+  56 
+  57 try {
+→ 58     const product = await prisma.product.findUnique(
+Can't reach database server at `aws-db.c76io8uqid2o.ap-south-1.rds.amazonaws.com:5432`
+
+Please make sure your database server is running at `aws-db.c76io8uqid2o.ap-south-1.rds.amazonaws.com:5432`.
+2024-11-19 22:30:34 [ERROR]: Error fetching product by ID 2: 
+Invalid `prisma.product.findUnique()` invocation in
+/home/D/workspace/personal/justxchange-backend/src/api/services/product.service.ts:58:50
+
+  55 }
+  56 
+  57 try {
+→ 58     const product = await prisma.product.findUnique(
+Can't reach database server at `aws-db.c76io8uqid2o.ap-south-1.rds.amazonaws.com:5432`
+
+Please make sure your database server is running at `aws-db.c76io8uqid2o.ap-south-1.rds.amazonaws.com:5432`.
+2024-11-19 22:30:50 [INFO]: Fetching all categories
+2024-11-19 22:30:50 [INFO]: Fetching all categories
+2024-11-19 23:01:21 [INFO]: Fetching all categories
+2024-11-19 23:01:21 [INFO]: Fetching all categories
+2024-11-20 21:39:11 [INFO]: Sending SMS
+2024-11-20 21:39:12 [INFO]: SMS sent successfully
+2024-11-20 21:39:59 [INFO]: Fetching all categories
+2024-11-20 21:39:59 [INFO]: Fetching all categories
+2024-11-20 21:39:59 [ERROR]: Error fetching all products: No products found
+2024-11-20 21:39:59 [ERROR]: Error fetching all products: No products found
+2024-11-20 21:40:24 [INFO]: Fetching all categories
+2024-11-20 21:40:24 [ERROR]: Error fetching all products: No products found
+2024-11-20 21:40:24 [INFO]: Fetching all categories
+2024-11-20 21:40:24 [ERROR]: Error fetching all products: No products found
+2024-11-20 21:42:22 [INFO]: Fetching all categories
+2024-11-20 21:42:23 [INFO]: Fetching all categories
+2024-11-20 21:42:23 [ERROR]: Error fetching all products: No products found
+2024-11-20 21:42:23 [ERROR]: Error fetching all products: No products found
+2024-11-20 21:43:45 [INFO]: Fetching all categories
+2024-11-20 21:43:45 [ERROR]: Error fetching all products: No products found
+2024-11-20 21:44:12 [INFO]: Fetching all categories
+2024-11-20 21:44:47 [INFO]: Uploading file to S3
+2024-11-20 21:44:47 [ERROR]: Error uploading file to S3
+2024-11-20 21:55:47 [INFO]: Fetching all categories
+2024-11-21 20:04:59 [INFO]: Fetching all categories

@@ -8,5 +8,8 @@ export const generateToken = (userId: number) => {
 };
 
 export const verifyToken = (token: string) => {
-    return jwt.verify(token, SECRET_KEY);
+    return jwt.verify(token, SECRET_KEY) as {
+        userId: string;
+        [key: string]: any;
+    };
 };
