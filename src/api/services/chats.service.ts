@@ -100,7 +100,7 @@ export const chatService = {
                 include: {
                     product: true,
                     buyer: true,
-                    message: { take: 1, orderBy: { createdDate: 'desc' } },
+                    message: true,
                 },
             });
 

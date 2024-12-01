@@ -115,16 +115,12 @@ io.on('connection', (socket) => {
 
     socket.on('sendMessage', async (data) => {
         const { chatId, userId, message } = data;
-
+        console.log(data)
         // Save message to DB via service
-        await chatService.addMessage(chatId, userId, message);
+        const savedMessage = await chatService.addMessage(chatId, userId, message);
 
         // Emit message to receiver
-        io.to(chatId).emit('receiveMessage', {
-            userId,
-            message,
-            timestamp: new Date(),
-        });
+        io.to(chatId).emit('receiveMessage', savedMessage);
     });
 
     socket.on('disconnect', () => {

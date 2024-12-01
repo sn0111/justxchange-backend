@@ -98,7 +98,7 @@ export const userService = {
 
             const token = generateToken(user.userId);
 
-            return { token };
+            return { token: token, userId: user.userId };
         } catch (error) {
             console.error('Error saving user:', error);
             throw error;
