@@ -114,4 +114,37 @@ export const chatService = {
             throw error;
         }
     },
+
+    getProductChats: async (productUuid: string) => {
+        if (!productUuid) {
+            throw new BadRequestError('Product UUID is required');
+        }
+
+        try {
+            const chats = await prisma.chat.findMany({
+                where: {
+                    OR: [{ product: { id: productUuid } }],
+                },
+                include: {
+                    product: true,
+                    buyer: true,
+                    message: true,
+                },
+            });
+
+            if (!chats.length) {
+                throw new NotFoundError(
+                    `No chats found for product UUID ${productUuid}`,
+                );
+            }
+
+            return chats;
+        } catch (error) {
+            logger.error(
+                `Error fetching chats for product UUID ${productUuid}:`,
+                error,
+            );
+            throw error;
+        }
+    },
 };

@@ -52,4 +52,18 @@ export const chatController = {
             next(error);
         }
     },
+
+    getProductChats: async (
+        req: Request,
+        res: Response,
+        next: NextFunction,
+    ) => {
+        const productUuid = req.params.productUuid;
+        try {
+            const chats = await chatService.getProductChats(productUuid);
+            res.status(200).json({ data: chats });
+        } catch (error) {
+            next(error);
+        }
+    },
 };

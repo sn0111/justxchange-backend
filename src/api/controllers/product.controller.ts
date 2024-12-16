@@ -47,7 +47,9 @@ export const productController = {
             }
         } */
         try {
-            const products = await productService.getAll();
+            const products = await productService.getAll(
+                Number(req.user?.userId),
+            );
             res.json({ data: products });
         } catch (err) {
             next(err);
@@ -65,7 +67,7 @@ export const productController = {
         } */
         try {
             const product: IProduct | null = await productService.getById(
-                Number(req.params.id),
+                req.params.id,
             );
             if (!product)
                 return res
@@ -127,6 +129,22 @@ export const productController = {
                 );
 
             res.json({ data: products });
+        } catch (err) {
+            next(err);
+        }
+    },
+    // Get a product by ID
+    getUserProducts: async (
+        req: Request,
+        res: Response,
+        next: NextFunction,
+    ) => {
+        try {
+            const product: IProduct[] = await productService.getUserProducts(
+                Number(req.user?.userId),
+            );
+
+            res.json({ data: product });
         } catch (err) {
             next(err);
         }

@@ -22,15 +22,17 @@ export const productService = {
         }
     },
 
-    getAll: async () => {
+    getAll: async (userId: number) => {
         try {
             const products: IProduct[] =
-                await prisma.$queryRaw`SELECT * FROM "products" ORDER BY RANDOM() LIMIT 10`;
+                await prisma.$queryRaw`SELECT * FROM "products" WHERE "user_id" != ${userId} ORDER BY RANDOM() LIMIT 10`;
+
             if (!products.length) {
                 throw new NotFoundError('No products found');
             }
             const formattedProducts: IProduct[] = products.map(
                 (product: any) => ({
+                    id: product.id,
                     productId: product.product_id, // Ensure keys match the database mappings
                     productName: product.product_name,
                     description: product.description,
@@ -49,14 +51,14 @@ export const productService = {
         }
     },
 
-    getById: async (id: number) => {
+    getById: async (id: string) => {
         if (!id) {
             throw new BadRequestError('Product ID is required');
         }
 
         try {
             const product = await prisma.product.findUnique({
-                where: { productId: id },
+                where: { id: id },
             });
 
             if (!product) {
@@ -133,6 +135,19 @@ export const productService = {
                 `Error fetching products for category ID ${categoryId}:`,
                 error,
             );
+            throw error;
+        }
+    },
+
+    getUserProducts: async (userId: number) => {
+        try {
+            const products = await prisma.product.findMany({
+                where: { userId: userId },
+            });
+
+            return products;
+        } catch (error) {
+            logger.error(`Error fetching product by userId ${userId}:`, error);
             throw error;
         }
     },
