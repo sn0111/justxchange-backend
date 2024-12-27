@@ -137,4 +137,18 @@ export const userService = {
             throw error;
         }
     },
+
+    userProfile: async (userId: number) => {
+        try {
+            const user = await prisma.user.findUnique({
+                where: { userId },
+                include: { address: true },
+            });
+
+            return user;
+        } catch (error) {
+            console.error('Error in user profile:', error);
+            throw error;
+        }
+    },
 };

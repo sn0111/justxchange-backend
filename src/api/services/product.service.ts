@@ -27,9 +27,9 @@ export const productService = {
             const products: IProduct[] =
                 await prisma.$queryRaw`SELECT * FROM "products" WHERE "user_id" != ${userId} ORDER BY RANDOM() LIMIT 10`;
 
-            if (!products.length) {
-                throw new NotFoundError('No products found');
-            }
+            // if (!products.length) {
+            //     throw new NotFoundError('No products found');
+            // }
             const formattedProducts: IProduct[] = products.map(
                 (product: any) => ({
                     id: product.id,

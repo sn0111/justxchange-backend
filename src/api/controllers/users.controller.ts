@@ -49,4 +49,13 @@ export const userController = {
             next(err);
         }
     },
+    userProfile: async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const userId = req.user?.userId;
+            const response = await userService.userProfile(Number(userId));
+            res.json({ data: response });
+        } catch (err) {
+            next(err);
+        }
+    },
 };
