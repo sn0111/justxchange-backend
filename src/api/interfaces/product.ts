@@ -8,3 +8,13 @@ export interface IProduct {
     images?: string[];
     condition: string | null;
 }
+
+export interface IProductFilters{
+    productUuid: string;
+    categoryUuid: string;
+    searchQuery: string;
+    condition: string;
+    page: number;
+    size: number;
+    isFilter: boolean;
+}

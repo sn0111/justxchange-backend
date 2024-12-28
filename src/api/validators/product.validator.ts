@@ -18,12 +18,12 @@ const productSchema = Joi.object({
         'number.positive': 'Category ID must be a positive number',
         'any.required': 'Category ID is required',
     }),
-    userId: Joi.number().integer().positive().required().messages({
-        'number.base': 'User ID must be a number',
-        'number.integer': 'User ID must be an integer',
-        'number.positive': 'User ID must be a positive number',
-        'any.required': 'User ID is required',
-    }),
+    // userId: Joi.number().integer().positive().required().messages({
+    //     'number.base': 'User ID must be a number',
+    //     'number.integer': 'User ID must be an integer',
+    //     'number.positive': 'User ID must be a positive number',
+    //     'any.required': 'User ID is required',
+    // }),
     images: Joi.array().items(Joi.string().uri()).optional(), // Optional array of image URLs
     condition: Joi.string().valid('New', 'Used').required().messages({
         'any.only': 'Condition must be either "new" or "used"',

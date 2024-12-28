@@ -1,8 +1,9 @@
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 import { IProduct } from '../interfaces';
 import logger from '../../config/Logger';
 import { BadRequestError, NotFoundError } from '../utils/errorHandler';
 import { array } from 'joi';
+import { IProductFilters } from '../interfaces/product';
 
 const prisma = new PrismaClient();
 
@@ -11,7 +12,7 @@ export const productService = {
         if (!productData) {
             throw new BadRequestError('Product data is required');
         }
-
+        
         try {
             const newProduct = await prisma.product.create({
                 data: productData,
@@ -184,6 +185,127 @@ export const productService = {
             return products;
         } catch (error) {
             logger.error(`Error fetching product by userId ${userId}:`, error);
+            throw error;
+        }
+    },
+
+    getFilterProducts: async (body: IProductFilters, userId: number) => {
+        try {
+            let products: IProduct[]=[];
+            let totalCount: number = 0;
+            const pageNumber = body.page;
+            const pageSize = body.size;
+            if(body.isFilter){
+    
+                const where: Prisma.ProductWhereInput = {
+                    AND: [],
+                };
+    
+                if (body.searchQuery) {
+                    (where.AND as Prisma.ProductWhereInput[]).push({
+                      OR: [
+                        { productName: { contains: body.searchQuery as string, mode: 'insensitive' } },
+                        { description: { contains: body.searchQuery as string, mode: 'insensitive' } },
+                        { category: {
+                            categoryName: {contains: body.searchQuery, mode: 'insensitive'}
+                        }}
+                      ],
+                    });
+                }
+              
+                if (body.productUuid) {
+                    (where.AND as Prisma.ProductWhereInput[]).push({
+                        id: body.productUuid
+                    });
+                }
+
+                if (body.categoryUuid) {
+                    (where.AND as Prisma.ProductWhereInput[]).push({
+                        category: {
+                        id: body.categoryUuid
+                        },
+                    });
+                }
+            
+                if (body.condition) {
+                    (where.AND as Prisma.ProductWhereInput[]).push({
+                        condition: body.condition,
+                    });
+                }
+              
+                // Fetch products with pagination
+                products = await prisma.product.findMany({
+                where,
+                skip: (pageNumber - 1) * pageSize,
+                take: pageSize,
+                include: {
+                    category: false, // Include category details if needed
+                },
+                });
+            
+                // Fetch total count for pagination metadata
+                totalCount = await prisma.product.count({ where });
+            }
+            else{
+                products = await prisma.$queryRaw`SELECT * FROM "products" WHERE "user_id" != ${userId} ORDER BY RANDOM() LIMIT 10`;
+                totalCount = await prisma.product.count();
+            }
+            
+            const formattedProducts: IProduct[] = products.map(
+                (product: any) => ({
+                    id: product.id,
+                    productId: body.isFilter ? product.productId : product.product_id, 
+                    productName: body.isFilter ? product.productName : product.product_name,
+                    description: product.description,
+                    amount: product.amount,
+                    categoryId: body.isFilter ? product.categoryId : product.category_id,
+                    userId: body.isFilter ? product.userId : product.user_id,
+                    images: product.images, 
+                    condition: product.condition,
+                }),
+            );
+          
+            return {
+                data: formattedProducts,
+                meta: {
+                  totalCount,
+                  totalPages: Math.ceil(totalCount / pageSize),
+                  currentPage: pageNumber,
+                },
+            }
+        } catch (error) {
+            logger.error('Error fetching all products:', error);
+            throw error;
+        }
+    },
+
+    searchSuggestions: async (searchQuery: string) => {
+
+        try {
+            const suggestions = await prisma.product.findMany({
+                where: {
+                  OR: [
+                    { productName: { contains: searchQuery, mode: 'insensitive' } },
+                    { description: { contains: searchQuery, mode: 'insensitive' } },
+                    { category: {
+                        categoryName: {contains: searchQuery, mode: 'insensitive'}
+                    }}
+                  ],
+                },
+                select: {
+                  productName: true,
+                  id: true,
+                },
+                take: 10,
+            });
+          
+            return suggestions
+          
+        } catch (error: any) {
+            logger.error(
+                `Error fetching suggestions ${searchQuery}:`,
+                error,
+            );
             throw error;
         }
     },
