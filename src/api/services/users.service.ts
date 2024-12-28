@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { smsService } from './sms.service';
 import { IVerifyOtp } from '../interfaces';
-import { IUser, IUserLoginIn } from '../interfaces/user';
+import { IUser, IUserLoginIn, IUserProfile } from '../interfaces/user';
 import { generateToken } from './auth.service';
 import { comparePassword, hashPassword } from '../utils/auth';
 
@@ -146,6 +146,46 @@ export const userService = {
             });
 
             return user;
+        } catch (error) {
+            console.error('Error in user profile:', error);
+            throw error;
+        }
+    },
+
+    saveProfile: async (userId: number, body: IUserProfile) => {
+        try {
+            const user = await prisma.user.findUnique({
+                where: { userId },
+                include: { address: true },
+            });
+
+            await prisma.user.update({
+                where: { userId },
+                data: {
+                    firstName: body.firstName,
+                    college: body.college,
+                },
+            });
+            const address = await prisma.address.findFirst({where:{userId}});
+            if(address){
+                await prisma.address.update({
+                    where:{addressId:address.addressId},
+                    data:{
+                        address:body.address,
+                        mobileNumber: body.contactNumber
+                    }
+                })
+            }else{
+                await prisma.address.create({
+                    data:{
+                        userId:userId,
+                        address: body.address,
+                        mobileNumber: body.contactNumber
+                    }
+                })
+            }
+
+            return "User profile details updated.";
         } catch (error) {
             console.error('Error in user profile:', error);
             throw error;

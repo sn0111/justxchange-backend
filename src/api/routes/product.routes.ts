@@ -17,5 +17,7 @@ router.put('/products/:id', productController.updateProduct);
 router.delete('/products/:id', productController.deleteProduct);
 router.get('/products/category/:categoryId', productController.getByCategoryId);
 router.get('/user/products', productController.getUserProducts);
+router.get('/product/add-wishlist/:id', productController.addProductWishlist);
+router.get('/product/user-wishlists', productController.getUserWishlists);
 
 export default router;

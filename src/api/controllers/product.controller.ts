@@ -97,7 +97,7 @@ export const productController = {
             if (!product)
                 return res
                     .status(404)
-                    .json(exceptionMsger('Product not found'));
+                    .json(exceptionMsger('Product Id not found'));
             res.json({
                 message: 'Updated product successfully',
                 data: product,
@@ -141,6 +141,38 @@ export const productController = {
     ) => {
         try {
             const product: IProduct[] = await productService.getUserProducts(
+                Number(req.user?.userId),
+            );
+
+            res.json({ data: product });
+        } catch (err) {
+            next(err);
+        }
+    },
+    addProductWishlist: async (
+        req: Request,
+        res: Response,
+        next: NextFunction,
+    ) => {
+        try {
+            const result = await productService.addProductWishlist(
+                Number(req.user?.userId),
+                req.params.id,
+            );
+
+
+            res.json({ data: result });
+        } catch (err) {
+            next(err);
+        }
+    },
+    getUserWishlists: async (
+        req: Request,
+        res: Response,
+        next: NextFunction,
+    ) => {
+        try {
+            const product: IProduct[] = await productService.getUserWishlists(
                 Number(req.user?.userId),
             );
 

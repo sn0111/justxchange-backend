@@ -52,3 +52,31 @@ export const mobileNumberSchema = Joi.object({
         'any.required': 'Mobile number is required',
     }),
 });
+
+export const userProfileSchema = Joi.object({
+    firstName: Joi.string().trim().required().messages({
+        'string.empty': 'First name is required',
+        'any.required': 'First name is required',
+    }),
+    email: Joi.string().email().trim().required().messages({
+        'string.email': 'Email must be valid',
+        'string.empty': 'Email is required',
+        'any.required': 'Email is required',
+    }),
+    mobileNumber: Joi.string().trim().required().messages({
+        'string.empty': 'Mobile number is required',
+        'any.required': 'Mobile number is required',
+    }),
+    college: Joi.string().trim().required().messages({
+        'string.empty': 'College is required',
+        'any.required': 'College is required',
+    }),
+    contactNumber: Joi.string().trim().required().messages({
+        'string.empty': 'Contact number is required',
+        'any.required': 'Contact number is required',
+    }),
+    address: Joi.string().trim().required().messages({
+        'string.empty': 'Address is required',
+        'any.required': 'Address is required',
+    }),
+});

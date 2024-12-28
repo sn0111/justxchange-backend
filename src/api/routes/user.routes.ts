@@ -7,5 +7,6 @@ router.post('/verify-otp', userController.verifyOtp);
 router.post('/save-user', userController.saveUser);
 router.post('/login-user', userController.loginUser);
 router.get('/user-profile', userController.userProfile);
+router.post('/save-profile', userController.saveProfile);
 
 export default router;

@@ -4,6 +4,7 @@ import { otpVerifySchema } from '../validators/otp.validator';
 import {
     loginSchema,
     mobileNumberSchema,
+    userProfileSchema,
     userSchema,
 } from '../validators/user.validator';
 
@@ -53,6 +54,17 @@ export const userController = {
         try {
             const userId = req.user?.userId;
             const response = await userService.userProfile(Number(userId));
+            res.json({ data: response });
+        } catch (err) {
+            next(err);
+        }
+    },
+
+    saveProfile: async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const userId = req.user?.userId;
+            await userProfileSchema.validateAsync(req.body);
+            const response = await userService.saveProfile(Number(userId), req.body);
             res.json({ data: response });
         } catch (err) {
             next(err);

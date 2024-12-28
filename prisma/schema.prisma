@@ -156,6 +156,17 @@ model Message {
   @@map("messages")
 }
 
+model UserProductWishList {
+  id          String   @unique @default(uuid()) @db.Uuid
+  wishListId  Int      @id @default(autoincrement()) @map("wishlist_id")
+  productId   Int      @map("product_id")
+  userId      Int      @map("user_id")
+  createdDate DateTime @default(now()) @map("created_date")
+  updatedDate DateTime @default(now()) @map("updated_date")
+
+  @@map("user_wishlists")
+}
+
 generator client {
   provider = "prisma-client-js"
 }

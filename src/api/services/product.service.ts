@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { IProduct } from '../interfaces';
 import logger from '../../config/Logger';
 import { BadRequestError, NotFoundError } from '../utils/errorHandler';
+import { array } from 'joi';
 
 const prisma = new PrismaClient();
 
@@ -123,12 +124,6 @@ export const productService = {
                 where: { categoryId },
             });
 
-            if (!products.length) {
-                throw new NotFoundError(
-                    `No products found for category ID ${categoryId}`,
-                );
-            }
-
             return products;
         } catch (error: any) {
             logger.error(
@@ -144,6 +139,47 @@ export const productService = {
             const products = await prisma.product.findMany({
                 where: { userId: userId },
             });
+
+            return products;
+        } catch (error) {
+            logger.error(`Error fetching product by userId ${userId}:`, error);
+            throw error;
+        }
+    },
+
+    addProductWishlist: async (userId: number, uuid: string) => {
+        try {
+            const product = await prisma.product.findUnique({
+                where: { id: uuid },
+            });
+
+            if(product){
+                await prisma.userProductWishList.create({
+                    data:{
+                        productId: product?.productId,
+                        userId: userId
+                    }
+                })
+                return "Added to your wishlist.";
+            }
+            throw new NotFoundError(`Product not found with ID ${uuid}`);
+
+        } catch (error) {
+            logger.error(`Error fetching product by userId ${userId}:`, error);
+            throw error;
+        }
+    },
+
+    getUserWishlists: async (userId: number) => {
+        try {
+            const wishlists = await prisma.userProductWishList.findMany();
+            const productIds = wishlists.map(p=>p.productId)
+            
+            const products = await prisma.product.findMany({
+                where:{
+                    productId:{ in : productIds}
+                }
+            })
 
             return products;
         } catch (error) {
