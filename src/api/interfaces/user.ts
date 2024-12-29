@@ -17,3 +17,13 @@ export interface IUserLoginIn {
     password: string;
     mobileNumber: string;
 }
+
+export interface IUserProfile {
+    id: string;
+    firstName: string;
+    email: string;
+    mobileNumber: string;
+    college: string;
+    address: string;
+    contactNumber: string;
+}

@@ -4,6 +4,7 @@ import { productService } from '../services';
 import { IProduct } from '../interfaces/product';
 import productSchema from '../validators/product.validator';
 import { exceptionMsger } from '../utils/exceptionMsger';
+import { BadRequestError } from '../utils/errorHandler';
 
 export const productController = {
     // Create a new product
@@ -24,6 +25,7 @@ export const productController = {
                 ...req.body,
                 amount: parseFloat(req.body.amount),
                 categoryId: parseFloat(req.body.categoryId),
+                userId: Number(req.user?.userId)
             };
             const product: IProduct = await productService.create(productData);
 
@@ -97,7 +99,7 @@ export const productController = {
             if (!product)
                 return res
                     .status(404)
-                    .json(exceptionMsger('Product not found'));
+                    .json(exceptionMsger('Product Id not found'));
             res.json({
                 message: 'Updated product successfully',
                 data: product,
@@ -145,6 +147,67 @@ export const productController = {
             );
 
             res.json({ data: product });
+        } catch (err) {
+            next(err);
+        }
+    },
+    addProductWishlist: async (
+        req: Request,
+        res: Response,
+        next: NextFunction,
+    ) => {
+        try {
+            const result = await productService.addProductWishlist(
+                Number(req.user?.userId),
+                req.params.id,
+            );
+
+
+            res.json({ data: result });
+        } catch (err) {
+            next(err);
+        }
+    },
+    getUserWishlists: async (
+        req: Request,
+        res: Response,
+        next: NextFunction,
+    ) => {
+        try {
+            const product: IProduct[] = await productService.getUserWishlists(
+                Number(req.user?.userId),
+            );
+
+            res.json({ data: product });
+        } catch (err) {
+            next(err);
+        }
+    },
+
+    getFilterProducts: async (req: Request, res: Response, next: NextFunction) => {
+
+        try {
+            const products = await productService.getFilterProducts(req.body, Number(req.user?.userId));
+            res.json({ data: products });
+        } catch (err) {
+            next(err);
+        }
+    },
+    searchSuggestions: async (
+        req: Request,
+        res: Response,
+        next: NextFunction,
+    ) => {
+        try {
+            const { query } = req.query;
+
+            if (!query || (query as string).trim() === '') {
+                throw new BadRequestError('searchQuery parameter is required.');
+            }
+            const searchQuery = query as string;
+            const suggestions = await productService.searchSuggestions(searchQuery);
+
+            res.json({ data: suggestions });
         } catch (err) {
             next(err);
         }
