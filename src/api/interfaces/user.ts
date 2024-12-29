@@ -1,6 +1,7 @@
 export interface IVerifyOtp {
     mobileNumber: string;
     otp: string;
+    lastLoginOtp: string;
 }
 
 export interface IUser {

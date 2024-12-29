@@ -4,6 +4,7 @@ import { IVerifyOtp } from '../interfaces';
 import { IUser, IUserLoginIn } from '../interfaces/user';
 import { generateToken } from './auth.service';
 import { comparePassword, hashPassword } from '../utils/auth';
+import { generateOtpFormats } from '../utils/otpUtil';
 
 const prisma = new PrismaClient();
 
@@ -13,8 +14,7 @@ export const userService = {
             let user = await prisma.user.findUnique({
                 where: { mobileNumber },
             });
-            const otp = Math.floor(100000 + Math.random() * 900000).toString();
-            const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
+            const { otp, otpExpiry } = generateOtpFormats();
             if (!user) {
                 user = await prisma.user.create({
                     data: {
@@ -40,7 +40,7 @@ export const userService = {
     },
 
     verifyOtp: async (body: IVerifyOtp) => {
-        const { mobileNumber, otp } = body;
+        const { mobileNumber, otp, lastLoginOtp } = body;
 
         try {
             const user = await prisma.user.findUnique({
@@ -50,9 +50,19 @@ export const userService = {
             if (!user) {
                 throw new Error('Mobile number not found');
             }
+            console.log('otp:', otp, 'user.otp:', user.otp);
 
-            if (user.otp !== otp) {
-                throw new Error('Invalid Otp');
+            if (user.otp && user.otp !== otp) {
+                throw new Error('Invalid OTP');
+            }
+            console.log(
+                'user.lastLoginOtp:',
+                user.lastLoginOtp,
+                'lastLoginOtp:',
+                lastLoginOtp,
+            );
+            if (lastLoginOtp && user.lastLoginOtp !== lastLoginOtp) {
+                throw new Error('Invalid login OTP');
             }
 
             if (user.otpExpiry && user.otpExpiry < new Date()) {
@@ -61,9 +71,21 @@ export const userService = {
 
             await prisma.user.update({
                 where: { mobileNumber },
-                data: { mobileVerified: true, otp: null, otpExpiry: null },
+                data: {
+                    mobileVerified: true,
+                    otp: null,
+                    otpExpiry: null,
+                    lastLoginOtp: null,
+                },
             });
-
+            if (user.lastLoginOtp) {
+                const token = generateToken(user.userId);
+                return {
+                    token: token,
+                    userId: user.userId,
+                    isAdvancedAuthEnabled: user.is2FAEnabled,
+                };
+            }
             return 'OTP verified successfully.';
         } catch (error) {
             console.error('Error verifying OTP:', error);
@@ -110,6 +132,7 @@ export const userService = {
             const user = await prisma.user.findUnique({
                 where: { mobileNumber: body.mobileNumber },
             });
+            const is2FAEnabled = user?.is2FAEnabled;
 
             if (!user) {
                 throw new Error('Mobile number not found');
@@ -129,9 +152,29 @@ export const userService = {
                 throw new Error('Invalid User password');
             }
 
+            // Handle 2FA if enabled
+            if (is2FAEnabled) {
+                const { otp, otpExpiry } = generateOtpFormats();
+
+                await prisma.user.update({
+                    where: { mobileNumber: body.mobileNumber },
+                    data: { lastLoginOtp: otp, otpExpiry, otp: null },
+                });
+
+                await smsService.sendSms(body.mobileNumber, otp);
+                return {
+                    message: 'OTP sent for Mobile Verification',
+                    requires2FA: true,
+                };
+            }
+
             const token = generateToken(user.userId);
 
-            return { token: token, userId: user.userId };
+            return {
+                token: token,
+                userId: user.userId,
+                isAdvancedAuthEnabled: is2FAEnabled,
+            };
         } catch (error) {
             console.error('Error login user:', error);
             throw error;

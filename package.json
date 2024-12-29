@@ -49,6 +49,7 @@
         "swagger-autogen": "^2.23.7",
         "swagger-ui-express": "^5.0.1",
         "twilio": "^5.3.5",
+        "winston": "^3.17.0",
         "winston-daily-rotate-file": "^5.0.0"
     },
     "devDependencies": {
@@ -58,6 +59,7 @@
         "@types/jsonwebtoken": "^9.0.7",
         "@types/node": "^22.7.5",
         "@types/socket.io": "^3.0.1",
+        "@types/winston": "^2.4.4",
         "eslint-config-prettier": "^9.1.0",
         "eslint-plugin-prettier": "^5.2.1",
         "nodemon": "^3.1.7",

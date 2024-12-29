@@ -1,77 +1,79 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+generator client {
+  provider = "prisma-client-js"
+}
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
-// schema.prisma
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
 
 model Product {
-  id          String   @unique @default(uuid()) @db.Uuid
-  productId   Int      @id @default(autoincrement()) @map("product_id")
-  description String   @map("description") @db.VarChar(255)
-  productName String   @map("product_name") @db.VarChar(50)
-  amount      Float    @map("amount")
-  categoryId  Int      @map("category_id")
-  userId      Int      @map("user_id")
-  images      String[] @map("images")
-  condition   String?
-  createdDate DateTime @default(now()) @map("created_date")
-  updatedDate DateTime @default(now()) @map("updated_date")
-  createdBy   Int      @default(1) @map("created_by")
-  updatedBy   Int      @default(1) @map("updated_by")
-
-  user     User     @relation(fields: [userId], references: [userId], onDelete: Cascade)
-  category Category @relation(fields: [categoryId], references: [categoryId], onDelete: Cascade)
-
-  userTransactoin  UserTransaction[]
-  productFovourite ProductFovourite[]
+  id               String             @unique @default(uuid()) @db.Uuid
+  productId        Int                @id @default(autoincrement()) @map("product_id")
+  description      String             @map("description") @db.VarChar(255)
+  productName      String             @map("product_name") @db.VarChar(50)
+  amount           Float              @map("amount")
+  categoryId       Int                @map("category_id")
+  userId           Int                @map("user_id")
+  images           String[]           @map("images")
+  condition        String?
+  createdDate      DateTime           @default(now()) @map("created_date")
+  updatedDate      DateTime           @default(now()) @map("updated_date")
+  createdBy        Int                @default(1) @map("created_by")
+  updatedBy        Int                @default(1) @map("updated_by")
   chat             Chat[]
+  productFovourite ProductFovourite[]
+  category         Category           @relation(fields: [categoryId], references: [categoryId], onDelete: Cascade)
+  user             User               @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  userTransactoin  UserTransaction[]
 
   @@map("products")
 }
 
 model Category {
-  id           String   @unique @default(uuid()) @db.Uuid
-  categoryId   Int      @id @default(autoincrement()) @map("category_id")
-  categoryName String   @map("category_name") @db.VarChar(50)
-  createdDate  DateTime @default(now()) @map("created_date")
-  updatedDate  DateTime @default(now()) @map("updated_date")
-  createdBy    Int      @default(1) @map("created_by")
-  updatedBy    Int      @default(1) @map("updated_by")
-
-  products          Product[]
+  id                String              @unique @default(uuid()) @db.Uuid
+  categoryId        Int                 @id @default(autoincrement()) @map("category_id")
+  categoryName      String              @map("category_name") @db.VarChar(50)
+  createdDate       DateTime            @default(now()) @map("created_date")
+  updatedDate       DateTime            @default(now()) @map("updated_date")
+  createdBy         Int                 @default(1) @map("created_by")
+  updatedBy         Int                 @default(1) @map("updated_by")
   categoryFovourite CategoryFovourite[]
+  products          Product[]
 
   @@map("categories")
 }
 
 model User {
-  id             String    @unique @default(uuid()) @db.Uuid
-  userId         Int       @id @default(autoincrement()) @map("user_id")
-  firstName      String?   @map("first_name") @db.VarChar(50)
-  lastName       String?   @map("last_name") @db.VarChar(50)
-  email          String?   @unique @map("email") @db.VarChar(50)
-  mobileNumber   String    @unique @map("mobile_number") @db.VarChar(15)
-  password       String?   @map("password")
-  emailVerified  Boolean   @default(false) @map("email_verified")
-  mobileVerified Boolean   @default(false) @map("mobile_verified")
-  college        String?   @map("college_name") @db.VarChar(200)
-  createdDate    DateTime  @default(now()) @map("created_date")
-  updatedDate    DateTime  @default(now()) @map("updated_date")
-  createdBy      Int       @default(1) @map("created_by")
-  updatedBy      Int       @default(1) @map("updated_by")
-  otp            String?   @map("otp")
-  otpExpiry      DateTime? @map("otp_expiry")
-
-  products          Product[]
+  id                String              @unique @default(uuid()) @db.Uuid
+  userId            Int                 @id @default(autoincrement()) @map("user_id")
+  firstName         String?             @map("first_name") @db.VarChar(50)
+  lastName          String?             @map("last_name") @db.VarChar(50)
+  mobileNumber      String              @unique @map("mobile_number") @db.VarChar(15)
+  emailVerified     Boolean             @default(false) @map("email_verified")
+  mobileVerified    Boolean             @default(false) @map("mobile_verified")
+  college           String?             @map("college_name") @db.VarChar(200)
+  createdDate       DateTime            @default(now()) @map("created_date")
+  updatedDate       DateTime            @default(now()) @map("updated_date")
+  createdBy         Int                 @default(1) @map("created_by")
+  updatedBy         Int                 @default(1) @map("updated_by")
+  email             String?             @unique @map("email") @db.VarChar(50)
+  otp               String?             @map("otp")
+  otpExpiry         DateTime?           @map("otp_expiry")
+  password          String?             @map("password")
   address           Address[]
-  userTransactoin   UserTransaction[]
   categoryFovourite CategoryFovourite[]
-  productFovourite  ProductFovourite[]
   chat              Chat[]
   message           Message[]
+  productFovourite  ProductFovourite[]
+  products          Product[]
+  userTransactoin   UserTransaction[]
+  role               String?            @default("user") @map("role") @db.VarChar(20)
 
+  // Added for 2FA functionality
+  is2FAEnabled      Boolean             @default(false) @map("is_2fa_enabled") // Indicates whether 2FA is enabled for the user
+  lastLoginOtp      String?              @map("last_login_otp")                // Stores the last login OTP for 2FA
+  
   @@map("users")
 }
 
@@ -80,87 +82,77 @@ model Address {
   addressId    Int      @id @default(autoincrement()) @map("address_id")
   address      String
   mobileNumber String   @map("mobile_number") @db.VarChar(15)
-  user         User     @relation(fields: [userId], references: [userId])
   userId       Int      @map("user_id")
   createdDate  DateTime @default(now()) @map("created_date")
   updatedDate  DateTime @default(now()) @map("updated_date")
+  user         User     @relation(fields: [userId], references: [userId])
 
   @@map("addresses")
 }
 
 model CategoryFovourite {
   id                    String   @unique @default(uuid()) @db.Uuid
-  category_favourite_id Int      @id @default(autoincrement()) @map("category_favourite_id")
-  category              Category @relation(fields: [categoryId], references: [categoryId])
   categoryId            Int      @map("category_id")
-  user                  User     @relation(fields: [userId], references: [userId])
   userId                Int      @map("user_id")
   createdDate           DateTime @default(now()) @map("created_date")
   updatedDate           DateTime @default(now()) @map("updated_date")
+  category_favourite_id Int      @id @default(autoincrement()) @map("category_favourite_id")
+  category              Category @relation(fields: [categoryId], references: [categoryId])
+  user                  User     @relation(fields: [userId], references: [userId])
 
   @@map("category_favourites")
 }
 
 model ProductFovourite {
   id                   String   @unique @default(uuid()) @db.Uuid
-  product_favourite_id Int      @id @default(autoincrement()) @map("product_favourite_id")
-  product              Product  @relation(fields: [productId], references: [productId])
   productId            Int      @map("product_id")
-  user                 User     @relation(fields: [userId], references: [userId])
   userId               Int      @map("user_id")
   createdDate          DateTime @default(now()) @map("created_date")
   updatedDate          DateTime @default(now()) @map("updated_date")
+  product_favourite_id Int      @id @default(autoincrement()) @map("product_favourite_id")
+  product              Product  @relation(fields: [productId], references: [productId])
+  user                 User     @relation(fields: [userId], references: [userId])
 
   @@map("product_favourites")
 }
 
 model UserTransaction {
   id            String   @unique @default(uuid()) @db.Uuid
-  transactionId Int      @id @default(autoincrement()) @map("transaction_id")
-  product       Product  @relation(fields: [productId], references: [productId])
   productId     Int      @map("product_id")
-  user          User     @relation(fields: [userId], references: [userId])
   userId        Int      @map("user_id")
   createdDate   DateTime @default(now()) @map("created_date")
   updatedDate   DateTime @default(now()) @map("updated_date")
+  transactionId Int      @id @default(autoincrement()) @map("transaction_id")
+  product       Product  @relation(fields: [productId], references: [productId])
+  user          User     @relation(fields: [userId], references: [userId])
 
   @@map("user_transactions")
 }
 
 model Chat {
-  id          String   @unique @default(uuid()) @db.Uuid
-  chatId      Int      @id @default(autoincrement()) @map("chat_id")
-  product     Product  @relation(fields: [productId], references: [productId])
-  productId   Int      @map("product_id")
-  buyer       User     @relation(fields: [buyerId], references: [userId])
-  buyerId     Int      @map("user_id")
-  createdDate DateTime @default(now()) @map("created_date")
-  updatedDate DateTime @default(now()) @map("updated_date")
-
-  message Message[]
+  id          String    @unique @default(uuid()) @db.Uuid
+  productId   Int       @map("product_id")
+  buyerId     Int       @map("user_id")
+  createdDate DateTime  @default(now()) @map("created_date")
+  updatedDate DateTime  @default(now()) @map("updated_date")
+  chatId      Int       @id @default(autoincrement()) @map("chat_id")
+  product     Product   @relation(fields: [productId], references: [productId])
+  buyer       User      @relation(fields: [buyerId], references: [userId])
+  message     Message[]
 
   @@map("chats")
 }
 
 model Message {
   id          String   @unique @default(uuid()) @db.Uuid
-  message     String
-  messageId   Int      @id @default(autoincrement()) @map("message_id")
-  chat        Chat     @relation(fields: [chatId], references: [chatId])
   chatId      Int      @map("chat_id")
-  user        User     @relation(fields: [userId], references: [userId])
   userId      Int      @map("user_id")
   createdDate DateTime @default(now()) @map("created_date")
   updatedDate DateTime @default(now()) @map("updated_date")
+  message     String
+  messageId   Int      @id @default(autoincrement()) @map("message_id")
+  chat        Chat     @relation(fields: [chatId], references: [chatId])
+  user        User     @relation(fields: [userId], references: [userId])
 
   @@map("messages")
-}
-
-generator client {
-  provider = "prisma-client-js"
-}
-
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
