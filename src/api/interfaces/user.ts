@@ -26,4 +26,6 @@ export interface IUserProfile {
     college: string;
     address: string;
     contactNumber: string;
+    is2FAEnabled: boolean;
+    profileUrl: string;
 }

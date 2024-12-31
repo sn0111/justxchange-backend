@@ -61,6 +61,7 @@ model User {
   otp               String?             @map("otp")
   otpExpiry         DateTime?           @map("otp_expiry")
   password          String?             @map("password")
+  profileUrl        String?             @map("profile_url")
   address           Address[]
   categoryFovourite CategoryFovourite[]
   chat              Chat[]
@@ -68,12 +69,12 @@ model User {
   productFovourite  ProductFovourite[]
   products          Product[]
   userTransactoin   UserTransaction[]
-  role               String?            @default("user") @map("role") @db.VarChar(20)
+  role              String?             @default("user") @map("role") @db.VarChar(20)
 
   // Added for 2FA functionality
-  is2FAEnabled      Boolean             @default(false) @map("is_2fa_enabled") // Indicates whether 2FA is enabled for the user
-  lastLoginOtp      String?              @map("last_login_otp")                // Stores the last login OTP for 2FA
-  
+  is2FAEnabled Boolean @default(false) @map("is_2fa_enabled") // Indicates whether 2FA is enabled for the user
+  lastLoginOtp String? @map("last_login_otp") // Stores the last login OTP for 2FA
+
   @@map("users")
 }
 
@@ -167,4 +168,3 @@ model UserProductWishList {
 
   @@map("user_wishlists")
 }
-

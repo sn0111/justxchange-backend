@@ -3,14 +3,27 @@ import { BadRequestError, NotFoundError } from '../utils/errorHandler';
 import logger from '../../config/Logger';
 const prisma = new PrismaClient();
 export const chatService = {
-    createChat: async (productId: number, buyerId: number) => {
+    createChat: async (productId: string, buyerId: number) => {
         if (!productId || !buyerId) {
             throw new BadRequestError('Product ID and Buyer ID are required');
         }
 
         try {
+
+            const product = await prisma.product.findUnique({ where: { id: productId } })
+
+            if (!product) {
+                throw new BadRequestError("Product Uuid not found");
+            }
+            if (product.userId == buyerId) {
+                return await prisma.chat.findMany({
+                    where: {
+                        productId: product.productId
+                    }
+                })
+            }
             const existingChat = await prisma.chat.findFirst({
-                where: { productId, buyerId },
+                where: { productId: product.productId, buyerId },
             });
 
             if (existingChat) {
@@ -19,35 +32,36 @@ export const chatService = {
 
             const newChat = await prisma.chat.create({
                 data: {
-                    productId,
+                    productId: product.productId,
                     buyerId,
                 },
             });
-
             return newChat;
+
         } catch (error) {
             logger.error('Error creating chat:', error);
             throw error;
         }
     },
 
-    addMessage: async (chatId: number, userId: number, messageText: string) => {
-        if (!chatId || !userId || !messageText) {
+    addMessage: async (chatUuid: string, userId: number, messageText: string) => {
+        console.log(chatUuid + " " + userId + " " + messageText)
+        if (!chatUuid || !userId || !messageText) {
             throw new BadRequestError(
                 'Chat ID, User ID, and Message text are required',
             );
         }
 
         try {
-            const chat = await prisma.chat.findUnique({ where: { chatId } });
+            const chat = await prisma.chat.findUnique({ where: { id: chatUuid } });
 
             if (!chat) {
-                throw new NotFoundError(`Chat with ID ${chatId} not found`);
+                throw new NotFoundError(`Chat with ID ${chatUuid} not found`);
             }
 
             const message = await prisma.message.create({
                 data: {
-                    chatId,
+                    chatId: chat.chatId,
                     userId,
                     message: messageText,
                 },
@@ -55,7 +69,7 @@ export const chatService = {
 
             return message;
         } catch (error) {
-            logger.error(`Error adding message to chat ID ${chatId}:`, error);
+            logger.error(`Error adding message to chat ID ${chatUuid}:`, error);
             throw error;
         }
     },
@@ -87,9 +101,24 @@ export const chatService = {
         }
     },
 
-    getUserChats: async (userId: number) => {
+    getUserChats: async (userId: number, productUuid: string) => {
         if (!userId) {
             throw new BadRequestError('User ID is required');
+        }
+
+        if (productUuid) {
+            return await prisma.chat.findMany({
+                where: {
+                    product: {
+                        id: productUuid
+                    },
+                },
+                include: {
+                    product: true,
+                    buyer: true,
+                    message: true,
+                },
+            });
         }
 
         try {

@@ -93,7 +93,7 @@ export const productController = {
         } */
         try {
             const product: IProduct | null = await productService.update(
-                Number(req.params.id),
+                req.params.id,
                 req.body,
             );
             if (!product)

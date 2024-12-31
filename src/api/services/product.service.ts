@@ -12,7 +12,7 @@ export const productService = {
         if (!productData) {
             throw new BadRequestError('Product data is required');
         }
-        
+
         try {
             const newProduct = await prisma.product.create({
                 data: productData,
@@ -74,14 +74,14 @@ export const productService = {
         }
     },
 
-    update: async (id: number, productData: IProduct) => {
+    update: async (id: string, productData: IProduct) => {
         if (!id || !productData) {
             throw new BadRequestError('Product ID and data are required');
         }
 
         try {
             const updatedProduct = await prisma.product.update({
-                where: { productId: id },
+                where: { id: id },
                 data: productData,
             });
 
@@ -154,9 +154,9 @@ export const productService = {
                 where: { id: uuid },
             });
 
-            if(product){
+            if (product) {
                 await prisma.userProductWishList.create({
-                    data:{
+                    data: {
                         productId: product?.productId,
                         userId: userId
                     }
@@ -174,11 +174,11 @@ export const productService = {
     getUserWishlists: async (userId: number) => {
         try {
             const wishlists = await prisma.userProductWishList.findMany();
-            const productIds = wishlists.map(p=>p.productId)
-            
+            const productIds = wishlists.map(p => p.productId)
+
             const products = await prisma.product.findMany({
-                where:{
-                    productId:{ in : productIds}
+                where: {
+                    productId: { in: productIds }
                 }
             })
 
@@ -191,28 +191,30 @@ export const productService = {
 
     getFilterProducts: async (body: IProductFilters, userId: number) => {
         try {
-            let products: IProduct[]=[];
+            let products: IProduct[] = [];
             let totalCount: number = 0;
             const pageNumber = body.page;
             const pageSize = body.size;
-            if(body.isFilter){
-    
+            if (body.isFilter) {
+
                 const where: Prisma.ProductWhereInput = {
                     AND: [],
                 };
-    
+
                 if (body.searchQuery) {
                     (where.AND as Prisma.ProductWhereInput[]).push({
-                      OR: [
-                        { productName: { contains: body.searchQuery as string, mode: 'insensitive' } },
-                        { description: { contains: body.searchQuery as string, mode: 'insensitive' } },
-                        { category: {
-                            categoryName: {contains: body.searchQuery, mode: 'insensitive'}
-                        }}
-                      ],
+                        OR: [
+                            { productName: { contains: body.searchQuery as string, mode: 'insensitive' } },
+                            { description: { contains: body.searchQuery as string, mode: 'insensitive' } },
+                            {
+                                category: {
+                                    categoryName: { contains: body.searchQuery, mode: 'insensitive' }
+                                }
+                            }
+                        ],
                     });
                 }
-              
+
                 if (body.productUuid) {
                     (where.AND as Prisma.ProductWhereInput[]).push({
                         id: body.productUuid
@@ -222,55 +224,55 @@ export const productService = {
                 if (body.categoryUuid) {
                     (where.AND as Prisma.ProductWhereInput[]).push({
                         category: {
-                        id: body.categoryUuid
+                            id: body.categoryUuid
                         },
                     });
                 }
-            
+
                 if (body.condition) {
                     (where.AND as Prisma.ProductWhereInput[]).push({
                         condition: body.condition,
                     });
                 }
-              
+
                 // Fetch products with pagination
                 products = await prisma.product.findMany({
-                where,
-                skip: (pageNumber - 1) * pageSize,
-                take: pageSize,
-                include: {
-                    category: false, // Include category details if needed
-                },
+                    where,
+                    skip: (pageNumber - 1) * pageSize,
+                    take: pageSize,
+                    include: {
+                        category: false, // Include category details if needed
+                    },
                 });
-            
+
                 // Fetch total count for pagination metadata
                 totalCount = await prisma.product.count({ where });
             }
-            else{
+            else {
                 products = await prisma.$queryRaw`SELECT * FROM "products" WHERE "user_id" != ${userId} ORDER BY RANDOM() LIMIT 10`;
                 totalCount = await prisma.product.count();
             }
-            
+
             const formattedProducts: IProduct[] = products.map(
                 (product: any) => ({
                     id: product.id,
-                    productId: body.isFilter ? product.productId : product.product_id, 
+                    productId: body.isFilter ? product.productId : product.product_id,
                     productName: body.isFilter ? product.productName : product.product_name,
                     description: product.description,
                     amount: product.amount,
                     categoryId: body.isFilter ? product.categoryId : product.category_id,
                     userId: body.isFilter ? product.userId : product.user_id,
-                    images: product.images, 
+                    images: product.images,
                     condition: product.condition,
                 }),
             );
-          
+
             return {
                 data: formattedProducts,
                 meta: {
-                  totalCount,
-                  totalPages: Math.ceil(totalCount / pageSize),
-                  currentPage: pageNumber,
+                    totalCount,
+                    totalPages: Math.ceil(totalCount / pageSize),
+                    currentPage: pageNumber,
                 },
             }
         } catch (error) {
@@ -284,23 +286,25 @@ export const productService = {
         try {
             const suggestions = await prisma.product.findMany({
                 where: {
-                  OR: [
-                    { productName: { contains: searchQuery, mode: 'insensitive' } },
-                    { description: { contains: searchQuery, mode: 'insensitive' } },
-                    { category: {
-                        categoryName: {contains: searchQuery, mode: 'insensitive'}
-                    }}
-                  ],
+                    OR: [
+                        { productName: { contains: searchQuery, mode: 'insensitive' } },
+                        { description: { contains: searchQuery, mode: 'insensitive' } },
+                        {
+                            category: {
+                                categoryName: { contains: searchQuery, mode: 'insensitive' }
+                            }
+                        }
+                    ],
                 },
                 select: {
-                  productName: true,
-                  id: true,
+                    productName: true,
+                    id: true,
                 },
                 take: 10,
             });
-          
+
             return suggestions
-          
+
         } catch (error: any) {
             logger.error(
                 `Error fetching suggestions ${searchQuery}:`,

@@ -21,6 +21,6 @@ router.get('/product/add-wishlist/:id', productController.addProductWishlist);
 router.get('/product/user-wishlists', productController.getUserWishlists);
 
 router.post('/filter/products', productController.getFilterProducts);
-router.get('/products/suggestions', productController.searchSuggestions);
+router.get('/product/suggestions', productController.searchSuggestions);
 
 export default router;

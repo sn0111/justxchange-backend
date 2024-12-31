@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { chatService } from '../services';
+import { BadRequestError } from '../utils/errorHandler';
 
 export const chatController = {
     createChat: async (req: Request, res: Response, next: NextFunction) => {
@@ -45,8 +46,11 @@ export const chatController = {
 
     getUserChats: async (req: Request, res: Response, next: NextFunction) => {
         const userId = req.user?.userId;
+        const { query } = req.query;
+
+        const productUuid = query as string;
         try {
-            const chats = await chatService.getUserChats(Number(userId));
+            const chats = await chatService.getUserChats(Number(userId), productUuid);
             res.status(200).json({ data: chats });
         } catch (error) {
             next(error);

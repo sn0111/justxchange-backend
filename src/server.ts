@@ -1,7 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
-import bodyParser from 'body-parser';
+import { VercelRequest, VercelResponse } from '@vercel/node'; // Import the Vercel types
 import dotenv from 'dotenv';
 import routes from './api/routes';
 import cors from 'cors';
@@ -102,15 +102,21 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     logger.error(`Error occurred in ${req.method} ${req.url}: ${err.message}`);
     res.status(500).send('Internal Server Error');
 });
+
+// This is the serverless function handler
+export default (req: VercelRequest, res: VercelResponse) => {
+    app(req, res); // Pass the request and response to Express
+};
+
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: '*' } });
 
 io.on('connection', (socket) => {
     console.log(`User connected: ${socket.id}`);
 
-    socket.on('join', (chatId: string) => {
-        socket.join(chatId);
-        console.log(`User ${chatId} joined room ${chatId}`);
+    socket.on('join', (chatUuid: string) => {
+        socket.join(chatUuid);
+        console.log(`User ${chatUuid} joined room ${chatUuid}`);
     });
 
     socket.on('sendMessage', async (data) => {

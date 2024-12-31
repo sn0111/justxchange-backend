@@ -207,21 +207,23 @@ export const userService = {
                 data: {
                     firstName: body.firstName,
                     college: body.college,
+                    is2FAEnabled: body.is2FAEnabled,
+                    profileUrl: body.profileUrl
                 },
             });
-            const address = await prisma.address.findFirst({where:{userId}});
-            if(address){
+            const address = await prisma.address.findFirst({ where: { userId } });
+            if (address) {
                 await prisma.address.update({
-                    where:{addressId:address.addressId},
-                    data:{
-                        address:body.address,
+                    where: { addressId: address.addressId },
+                    data: {
+                        address: body.address,
                         mobileNumber: body.contactNumber
                     }
                 })
-            }else{
+            } else {
                 await prisma.address.create({
-                    data:{
-                        userId:userId,
+                    data: {
+                        userId: userId,
                         address: body.address,
                         mobileNumber: body.contactNumber
                     }

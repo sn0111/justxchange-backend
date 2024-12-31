@@ -79,4 +79,9 @@ export const userProfileSchema = Joi.object({
         'string.empty': 'Address is required',
         'any.required': 'Address is required',
     }),
+    is2FAEnabled: Joi.boolean().default(false),
+    profileUrl: Joi.string().trim().required().messages({
+        'string.empty': 'Address is required',
+        'any.required': 'Address is required',
+    })
 });
