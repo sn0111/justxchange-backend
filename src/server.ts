@@ -1,7 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express';
 import http from 'http';
 import { Server } from 'socket.io';
-import { VercelRequest, VercelResponse } from '@vercel/node'; // Import the Vercel types
 import dotenv from 'dotenv';
 import routes from './api/routes';
 import cors from 'cors';
@@ -12,7 +11,7 @@ import { exceptionMsger } from './api/utils/exceptionMsger';
 import { errorHandler } from './api/utils/errorHandler';
 import { chatService } from './api/services';
 
-const swaggerDocument = require('./api/docs/swagger-output.json');
+// const swaggerDocument = require('./api/docs/swagger-output.json');
 const swaggerUi = require('swagger-ui-express');
 
 declare global {
@@ -87,7 +86,7 @@ app.use((req, res, next) => {
     next();
 });
 // Routes
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+// app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use(routes);
 app.use(errorHandler);
 
@@ -102,12 +101,6 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     logger.error(`Error occurred in ${req.method} ${req.url}: ${err.message}`);
     res.status(500).send('Internal Server Error');
 });
-
-// This is the serverless function handler
-export default (req: VercelRequest, res: VercelResponse) => {
-    app(req, res); // Pass the request and response to Express
-};
-
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: '*' } });
 
