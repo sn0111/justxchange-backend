@@ -7,9 +7,12 @@ export interface IProduct {
     userId: number;
     images?: string[];
     condition: string | null;
+    brand: string | null;
+    size: string | null;
+    color: string | null;
 }
 
-export interface IProductFilters{
+export interface IProductFilters {
     productUuid: string;
     categoryUuid: string;
     searchQuery: string;

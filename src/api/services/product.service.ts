@@ -43,6 +43,9 @@ export const productService = {
                     userId: product.user_id,
                     images: product.images, // Prisma will parse JSON array fields correctly
                     condition: product.condition,
+                    brand: product.brand,
+                    color: product.color,
+                    size: product.size
                 }),
             );
 
@@ -61,6 +64,13 @@ export const productService = {
         try {
             const product = await prisma.product.findUnique({
                 where: { id: id },
+                include: {
+                    user: {
+                        include: {
+                            address: true
+                        }
+                    }
+                }
             });
 
             if (!product) {
@@ -250,7 +260,7 @@ export const productService = {
             }
             else {
                 products = await prisma.$queryRaw`SELECT * FROM "products" WHERE "user_id" != ${userId} ORDER BY RANDOM() LIMIT 10`;
-                totalCount = await prisma.product.count();
+                totalCount = await prisma.product.count({ where: { userId: { not: userId } } });
             }
 
             const formattedProducts: IProduct[] = products.map(
@@ -264,6 +274,9 @@ export const productService = {
                     userId: body.isFilter ? product.userId : product.user_id,
                     images: product.images,
                     condition: product.condition,
+                    brand: product.brand,
+                    color: product.color,
+                    size: product.size
                 }),
             );
 

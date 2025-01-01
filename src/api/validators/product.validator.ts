@@ -29,6 +29,10 @@ const productSchema = Joi.object({
         'any.only': 'Condition must be either "new" or "used"',
         'any.required': 'Condition is required',
     }),
+    brand: Joi.string().optional().default("None").allow(''),
+    size: Joi.string().optional().default("None").allow(''),
+    color: Joi.string().optional().default("None").allow('')
+
 });
 
 // Export the schema

@@ -17,6 +17,9 @@ model Product {
   userId           Int                @map("user_id")
   images           String[]           @map("images")
   condition        String?
+  brand            String?
+  size             String?
+  color            String?
   createdDate      DateTime           @default(now()) @map("created_date")
   updatedDate      DateTime           @default(now()) @map("updated_date")
   createdBy        Int                @default(1) @map("created_by")
