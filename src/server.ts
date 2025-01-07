@@ -53,6 +53,7 @@ app.use((req, res, next) => {
         '/signup(/.*)?$',
         '/verify-otp',
         '/save-user',
+        '/forgot-password',
         '^/api-docs(/.*)?$',
         '^/socket.io(/.*)?$',
     ];

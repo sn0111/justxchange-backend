@@ -64,7 +64,20 @@ export const userController = {
         try {
             const userId = req.user?.userId;
             await userProfileSchema.validateAsync(req.body);
-            const response = await userService.saveProfile(Number(userId), req.body);
+            const response = await userService.saveProfile(
+                Number(userId),
+                req.body,
+            );
+            res.json({ data: response });
+        } catch (err) {
+            next(err);
+        }
+    },
+
+    forgotPassword: async (req: Request, res: Response, next: NextFunction) => {
+        try {
+            const response = await userService.forgotPassword(req.body);
+            console.log('response:', response);
             res.json({ data: response });
         } catch (err) {
             next(err);

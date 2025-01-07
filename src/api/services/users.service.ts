@@ -5,6 +5,7 @@ import { IUser, IUserLoginIn, IUserProfile } from '../interfaces/user';
 import { generateToken } from './auth.service';
 import { comparePassword, hashPassword } from '../utils/auth';
 import { generateOtpFormats } from '../utils/otpUtil';
+import bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
@@ -191,6 +192,40 @@ export const userService = {
             return user;
         } catch (error) {
             console.error('Error in user profile:', error);
+            throw error;
+        }
+    },
+
+    forgotPassword: async (body: IUserLoginIn) => {
+        const { mobileNumber, password } = body;
+        const hashedPassword = await hashPassword(password);
+
+        try {
+            const user = await prisma.user.findUnique({
+                where: { mobileNumber },
+            });
+
+            if (!user?.mobileVerified) {
+                throw new Error('Mobile number not verified');
+            }
+
+            if (user.password) {
+                // Compare new password with the existing hashed password
+                const isMatch = await bcrypt.compare(password, user.password);
+                if (isMatch) {
+                    throw new Error(
+                        'New password cannot be same as current password',
+                    );
+                }
+            }
+
+            await prisma.user.update({
+                where: { mobileNumber },
+                data: { password: hashedPassword, updatedDate: new Date() },
+            });
+            return { message: 'Password updated successfully.' };
+        } catch (error) {
+            console.error('Error in forgot password:', error);
             throw error;
         }
     },
