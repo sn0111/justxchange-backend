@@ -6,6 +6,8 @@ import chatRoutes from './chats.routes';
 import favouriteRoutes from './favourites.routes';
 import userRoutes from './user.routes';
 import { attachSwaggerResponses } from '../../middleware/response';
+import { authorizeTo } from '../../middleware/authorize';
+import commonRoutes from './common.routes';
 
 const router = Router();
 router.use(attachSwaggerResponses);
@@ -14,16 +16,27 @@ router.use(attachSwaggerResponses);
 // Protected routes (Require authentication)
 // router.use(authMiddleware); // Apply auth middleware to all routes that follow this
 
+// Common routes for both user and admin
+router.use(commonRoutes);
+
+//Routes wihtout specific "Role" authorization
 router.use(categoryRoutes /* #swagger.tags = ['Category']  */);
-
-router.use(productRoutes /* #swagger.tags = ['Product'] */);
-
 router.use(imageRoutes /* #swagger.tags = ['Image'] */);
-
-router.use(chatRoutes /* #swagger.tags = ['Chats'] */);
-
 router.use(favouriteRoutes /* #swagger.tags = ['Favourites'] */);
-
 router.use(userRoutes /* #swagger.tags = ['Users'] */);
+
+// Routes with specific "Role" authorization
+router.use(
+    '/products',
+    authorizeTo('user'),
+    productRoutes,
+    /* #swagger.tags = ['Product'] */
+);
+router.use(
+    '/chats',
+    authorizeTo('user'),
+    chatRoutes,
+    /* #swagger.tags = ['Chats'] */
+);
 
 export default router;

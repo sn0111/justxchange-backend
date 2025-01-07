@@ -11,7 +11,7 @@ import { exceptionMsger } from './api/utils/exceptionMsger';
 import { errorHandler } from './api/utils/errorHandler';
 import { chatService } from './api/services';
 
-// const swaggerDocument = require('./api/docs/swagger-output.json');
+const swaggerDocument = require('./api/docs/swagger-output.json');
 const swaggerUi = require('swagger-ui-express');
 
 declare global {
@@ -20,6 +20,7 @@ declare global {
             user?: {
                 userId: string;
                 [key: string]: any;
+                role: string;
             };
         }
     }
@@ -86,7 +87,7 @@ app.use((req, res, next) => {
     next();
 });
 // Routes
-// app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use(routes);
 app.use(errorHandler);
 
@@ -114,9 +115,13 @@ io.on('connection', (socket) => {
 
     socket.on('sendMessage', async (data) => {
         const { chatId, userId, message } = data;
-        console.log(data)
+        console.log(data);
         // Save message to DB via service
-        const savedMessage = await chatService.addMessage(chatId, userId, message);
+        const savedMessage = await chatService.addMessage(
+            chatId,
+            userId,
+            message,
+        );
 
         // Emit message to receiver
         io.to(chatId).emit('receiveMessage', savedMessage);

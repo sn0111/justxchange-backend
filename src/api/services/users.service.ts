@@ -79,7 +79,7 @@ export const userService = {
                 },
             });
             if (user.lastLoginOtp) {
-                const token = generateToken(user.userId);
+                const token = generateToken(user.userId, user.role as string);
                 return {
                     token: token,
                     userId: user.userId,
@@ -118,7 +118,7 @@ export const userService = {
                 },
             });
 
-            const token = generateToken(user.userId);
+            const token = generateToken(user.userId, user.role as string);
 
             return { token: token, userId: user.userId };
         } catch (error) {
@@ -168,7 +168,7 @@ export const userService = {
                 };
             }
 
-            const token = generateToken(user.userId);
+            const token = generateToken(user.userId, user.role as string);
 
             return {
                 token: token,
@@ -208,29 +208,31 @@ export const userService = {
                     firstName: body.firstName,
                     college: body.college,
                     is2FAEnabled: body.is2FAEnabled,
-                    profileUrl: body.profileUrl
+                    profileUrl: body.profileUrl,
                 },
             });
-            const address = await prisma.address.findFirst({ where: { userId } });
+            const address = await prisma.address.findFirst({
+                where: { userId },
+            });
             if (address) {
                 await prisma.address.update({
                     where: { addressId: address.addressId },
                     data: {
                         address: body.address,
-                        mobileNumber: body.contactNumber
-                    }
-                })
+                        mobileNumber: body.contactNumber,
+                    },
+                });
             } else {
                 await prisma.address.create({
                     data: {
                         userId: userId,
                         address: body.address,
-                        mobileNumber: body.contactNumber
-                    }
-                })
+                        mobileNumber: body.contactNumber,
+                    },
+                });
             }
 
-            return "User profile details updated.";
+            return 'User profile details updated.';
         } catch (error) {
             console.error('Error in user profile:', error);
             throw error;
