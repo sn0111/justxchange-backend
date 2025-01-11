@@ -26,7 +26,7 @@ export const s3Service = {
         // Set S3 upload parameters
         const params = {
             Bucket: bucketName,
-            Key: `uploads/${Date.now()}_${file.originalname}`, // File name in S3
+            Key: `uploads/${file.originalname}`, // File name in S3
             Body: file.buffer, // File content
             ContentType: file.mimetype, // Ensure the content type is set
         };

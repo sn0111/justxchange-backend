@@ -5,6 +5,6 @@ AWS.config.update({
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
     region: process.env.AWS_REGION,
 });
-
-const s3 = new AWS.S3();
+AWS.config.update({ logger: console });
+const s3 = new AWS.S3({ region: 'ap-south-1' });
 export default s3;
