@@ -78,6 +78,8 @@ model User {
   is2FAEnabled Boolean @default(false) @map("is_2fa_enabled") // Indicates whether 2FA is enabled for the user
   lastLoginOtp String? @map("last_login_otp") // Stores the last login OTP for 2FA
 
+  isContactView Boolean @default(false) @map("is_contact_view")
+
   @@map("users")
 }
 

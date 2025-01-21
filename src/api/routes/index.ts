@@ -16,9 +16,6 @@ router.use(attachSwaggerResponses);
 // Protected routes (Require authentication)
 // router.use(authMiddleware); // Apply auth middleware to all routes that follow this
 
-// Common routes for both user and admin
-router.use(commonRoutes);
-
 //Routes wihtout specific "Role" authorization
 router.use(categoryRoutes /* #swagger.tags = ['Category']  */);
 router.use(imageRoutes /* #swagger.tags = ['Image'] */);
@@ -39,4 +36,6 @@ router.use(
     /* #swagger.tags = ['Chats'] */
 );
 
+// Common routes for both user and admin
+router.use(commonRoutes);
 export default router;

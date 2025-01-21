@@ -116,6 +116,7 @@ export const userService = {
                     college: body.college,
                     email: body.email,
                     password: hashedPassword,
+                    profileUrl: process.env.USER_PROFILE_URL
                 },
             });
 
@@ -174,6 +175,7 @@ export const userService = {
             return {
                 token: token,
                 userId: user.userId,
+                profileUrl: user.profileUrl,
                 isAdvancedAuthEnabled: is2FAEnabled,
             };
         } catch (error) {
@@ -244,6 +246,7 @@ export const userService = {
                     college: body.college,
                     is2FAEnabled: body.is2FAEnabled,
                     profileUrl: body.profileUrl,
+                    isContactView: body.isContactView
                 },
             });
             const address = await prisma.address.findFirst({

@@ -83,5 +83,6 @@ export const userProfileSchema = Joi.object({
     profileUrl: Joi.string().trim().required().messages({
         'string.empty': 'Address is required',
         'any.required': 'Address is required',
-    })
+    }),
+    isContactView: Joi.boolean().default(false),
 });

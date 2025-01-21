@@ -28,4 +28,5 @@ export interface IUserProfile {
     contactNumber: string;
     is2FAEnabled: boolean;
     profileUrl: string;
+    isContactView: boolean;
 }
