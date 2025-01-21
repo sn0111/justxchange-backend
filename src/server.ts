@@ -11,7 +11,7 @@ import { exceptionMsger } from './api/utils/exceptionMsger';
 import { errorHandler } from './api/utils/errorHandler';
 import { chatService } from './api/services';
 
-const swaggerDocument = require('./api/docs/swagger-output.json');
+// const swaggerDocument = require('./api/docs/swagger-output.json');
 const swaggerUi = require('swagger-ui-express');
 
 declare global {
@@ -88,7 +88,7 @@ app.use((req, res, next) => {
     next();
 });
 // Routes
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+// app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use(routes);
 app.use(errorHandler);
 
