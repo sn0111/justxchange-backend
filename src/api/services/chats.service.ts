@@ -114,7 +114,11 @@ export const chatService = {
                     },
                 },
                 include: {
-                    product: true,
+                    product: {
+                        include: {
+                            user: true
+                        }
+                    },
                     buyer: true,
                     message: true,
                 },
@@ -127,7 +131,11 @@ export const chatService = {
                     OR: [{ buyerId: userId }],
                 },
                 include: {
-                    product: true,
+                    product: {
+                        include: {
+                            user: true
+                        }
+                    },
                     buyer: true,
                     message: true,
                 },
@@ -155,7 +163,11 @@ export const chatService = {
                     OR: [{ product: { id: productUuid } }],
                 },
                 include: {
-                    product: true,
+                    product: {
+                        include: {
+                            user: true
+                        }
+                    },
                     buyer: true,
                     message: true,
                 },
