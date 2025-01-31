@@ -21,3 +21,14 @@ export interface IProductFilters {
     size: number;
     isFilter: boolean;
 }
+
+export interface INotifications {
+    id: string;
+    notificationId: number;
+    productId: string;
+    message: string;
+    userId: number;
+    createdDate: Date;
+    updatedDate: Date;
+    isRead: boolean;
+}

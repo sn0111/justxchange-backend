@@ -9,7 +9,8 @@ import logger from './config/Logger';
 import { verifyToken } from './api/services/auth.service';
 import { exceptionMsger } from './api/utils/exceptionMsger';
 import { errorHandler } from './api/utils/errorHandler';
-import { chatService } from './api/services';
+import { chatService, productService } from './api/services';
+import { INotifications } from './api/interfaces/product';
 
 // const swaggerDocument = require('./api/docs/swagger-output.json');
 const swaggerUi = require('swagger-ui-express');
@@ -106,6 +107,8 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: '*' } });
 
+// const notifications:INotifications[]=[];
+
 io.on('connection', (socket) => {
     console.log(`User connected: ${socket.id}`);
 
@@ -128,11 +131,34 @@ io.on('connection', (socket) => {
         io.to(chatId).emit('receiveMessage', savedMessage);
     });
 
+    socket.on('subscribe', async (userId: string) => {
+        console.log(`User subscribed: ${userId}`);
+        socket.join(userId);
+
+        // Send unread notifications to the user
+        const userNotifications = await productService.getNotifications();
+        const filterNotifications = userNotifications.filter(
+            (n) => n.userId === Number(userId) && !n.isRead,
+        );
+        socket.emit('unread-notifications', filterNotifications);
+    });
+
+    // Mark notifications as read
+    socket.on('mark-as-read', async (notificationIds: string[]) => {
+        const notifications = await productService.getNotifications();
+        notificationIds.forEach((id) => {
+            const notification = notifications.find((n) => n.id === id);
+            if (notification) {
+                notification.isRead = true;
+            }
+        });
+    });
+
     socket.on('disconnect', () => {
         console.log(`User disconnected: ${socket.id}`);
     });
 });
-
+export { io };
 // Initialize models and then start the server
 const PORT = process.env.PORT || 8090;
 server.listen(PORT, () => {

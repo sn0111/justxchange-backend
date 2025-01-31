@@ -25,7 +25,7 @@ export const productController = {
                 ...req.body,
                 amount: parseFloat(req.body.amount),
                 categoryId: parseFloat(req.body.categoryId),
-                userId: Number(req.user?.userId)
+                userId: Number(req.user?.userId),
             };
             const product: IProduct = await productService.create(productData);
 
@@ -128,6 +128,7 @@ export const productController = {
             const products: IProduct[] | [] =
                 await productService.getByCategoryId(
                     Number(req.params.categoryId),
+                    Number(req.user?.userId),
                 );
 
             res.json({ data: products });
@@ -162,7 +163,6 @@ export const productController = {
                 req.params.id,
             );
 
-
             res.json({ data: result });
         } catch (err) {
             next(err);
@@ -184,10 +184,16 @@ export const productController = {
         }
     },
 
-    getFilterProducts: async (req: Request, res: Response, next: NextFunction) => {
-
+    getFilterProducts: async (
+        req: Request,
+        res: Response,
+        next: NextFunction,
+    ) => {
         try {
-            const products = await productService.getFilterProducts(req.body, Number(req.user?.userId));
+            const products = await productService.getFilterProducts(
+                req.body,
+                Number(req.user?.userId),
+            );
             res.json({ data: products });
         } catch (err) {
             next(err);
@@ -205,7 +211,8 @@ export const productController = {
                 throw new BadRequestError('searchQuery parameter is required.');
             }
             const searchQuery = query as string;
-            const suggestions = await productService.searchSuggestions(searchQuery);
+            const suggestions =
+                await productService.searchSuggestions(searchQuery);
 
             res.json({ data: suggestions });
         } catch (err) {

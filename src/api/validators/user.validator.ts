@@ -27,14 +27,18 @@ export const userSchema = Joi.object({
         'string.empty': 'College is required',
         'any.required': 'College is required',
     }),
+    emailOrSms: Joi.string().trim().required().messages({
+        'string.empty': 'SignUp type is required',
+        'any.required': 'SignUp type is required',
+    }),
 });
 
 export const loginSchema = Joi.object({
-    // email: Joi.string().email().trim().required().messages({
-    //     'string.email': 'Email must be valid',
-    //     'string.empty': 'Email is required',
-    //     'any.required': 'Email is required',
-    // }),
+    email: Joi.string().email().trim().required().messages({
+        'string.email': 'Email must be valid',
+        'string.empty': 'Email is required',
+        'any.required': 'Email is required',
+    }),
     mobileNumber: Joi.string().trim().required().messages({
         'string.empty': 'Mobile number is required',
         'any.required': 'Mobile number is required',
@@ -44,12 +48,20 @@ export const loginSchema = Joi.object({
         'string.empty': 'Password is required',
         'any.required': 'Password is required',
     }),
+    emailOrSms: Joi.string().trim().required().messages({
+        'string.empty': 'SignUp type is required',
+        'any.required': 'SignUp type is required',
+    }),
 });
 
 export const mobileNumberSchema = Joi.object({
-    mobileNumber: Joi.string().trim().required().messages({
-        'string.empty': 'Mobile number is required',
-        'any.required': 'Mobile number is required',
+    signUpValue: Joi.string().trim().required().messages({
+        'string.empty': 'Signup Value is required',
+        'any.required': 'Signup Value is required',
+    }),
+    emailOrSms: Joi.string().trim().required().messages({
+        'string.empty': 'SignUp type is required',
+        'any.required': 'SignUp type is required',
     }),
 });
 

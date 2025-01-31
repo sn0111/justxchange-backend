@@ -2,8 +2,8 @@ import { Prisma, PrismaClient } from '@prisma/client';
 import { IProduct } from '../interfaces';
 import logger from '../../config/Logger';
 import { BadRequestError, NotFoundError } from '../utils/errorHandler';
-import { array } from 'joi';
-import { IProductFilters } from '../interfaces/product';
+import { INotifications, IProductFilters } from '../interfaces/product';
+import { io } from '../../server';
 
 const prisma = new PrismaClient();
 
@@ -17,6 +17,23 @@ export const productService = {
             const newProduct = await prisma.product.create({
                 data: productData,
             });
+
+            const users = await prisma.user.findMany();
+            users.forEach(async (user) => {
+                const notification = await prisma.notifications.create({
+                    data: {
+                        userId: user.userId,
+                        message: `A new product "${newProduct.productName}" was added!`,
+                        productId: newProduct.id,
+                    },
+                });
+                // Send the notification to online users
+                io.to(user.userId.toString()).emit(
+                    'notification',
+                    notification,
+                );
+            });
+
             return newProduct;
         } catch (error) {
             logger.error('Error creating product:', error);
@@ -45,7 +62,7 @@ export const productService = {
                     condition: product.condition,
                     brand: product.brand,
                     color: product.color,
-                    size: product.size
+                    size: product.size,
                 }),
             );
 
@@ -67,10 +84,10 @@ export const productService = {
                 include: {
                     user: {
                         include: {
-                            address: true
-                        }
-                    }
-                }
+                            address: true,
+                        },
+                    },
+                },
             });
 
             if (!product) {
@@ -125,14 +142,35 @@ export const productService = {
         }
     },
 
-    getByCategoryId: async (categoryId: number) => {
+    getByCategoryId: async (categoryId: number, userId: number) => {
         if (!categoryId) {
             throw new BadRequestError('Category ID is required');
         }
 
         try {
             const products = await prisma.product.findMany({
-                where: { categoryId },
+                where: {
+                    categoryId,
+                    userId: {
+                        not: {
+                            equals: userId,
+                        },
+                    },
+                    user: {
+                        email: {
+                            contains: '@rguktn.ac.in',
+                            mode: 'insensitive',
+                        },
+                        OR: [
+                            {
+                                email: {
+                                    contains: '@rgukts.ac.in',
+                                    mode: 'insensitive',
+                                },
+                            },
+                        ],
+                    },
+                },
             });
 
             return products;
@@ -168,13 +206,12 @@ export const productService = {
                 await prisma.userProductWishList.create({
                     data: {
                         productId: product?.productId,
-                        userId: userId
-                    }
-                })
-                return "Added to your wishlist.";
+                        userId: userId,
+                    },
+                });
+                return 'Added to your wishlist.';
             }
             throw new NotFoundError(`Product not found with ID ${uuid}`);
-
         } catch (error) {
             logger.error(`Error fetching product by userId ${userId}:`, error);
             throw error;
@@ -184,13 +221,13 @@ export const productService = {
     getUserWishlists: async (userId: number) => {
         try {
             const wishlists = await prisma.userProductWishList.findMany();
-            const productIds = wishlists.map(p => p.productId)
+            const productIds = wishlists.map((p) => p.productId);
 
             const products = await prisma.product.findMany({
                 where: {
-                    productId: { in: productIds }
-                }
-            })
+                    productId: { in: productIds },
+                },
+            });
 
             return products;
         } catch (error) {
@@ -206,7 +243,6 @@ export const productService = {
             const pageNumber = body.page;
             const pageSize = body.size;
             if (body.isFilter) {
-
                 const where: Prisma.ProductWhereInput = {
                     AND: [],
                 };
@@ -214,28 +250,93 @@ export const productService = {
                 if (body.searchQuery) {
                     (where.AND as Prisma.ProductWhereInput[]).push({
                         OR: [
-                            { productName: { contains: body.searchQuery as string, mode: 'insensitive' } },
-                            { description: { contains: body.searchQuery as string, mode: 'insensitive' } },
+                            {
+                                productName: {
+                                    contains: body.searchQuery as string,
+                                    mode: 'insensitive',
+                                },
+                            },
+                            {
+                                description: {
+                                    contains: body.searchQuery as string,
+                                    mode: 'insensitive',
+                                },
+                            },
                             {
                                 category: {
-                                    categoryName: { contains: body.searchQuery, mode: 'insensitive' }
-                                }
-                            }
+                                    categoryName: {
+                                        contains: body.searchQuery,
+                                        mode: 'insensitive',
+                                    },
+                                },
+                            },
+                            {
+                                user: {
+                                    email: {
+                                        contains: '@rguktn.ac.in',
+                                        mode: 'insensitive',
+                                    },
+                                },
+                            },
+                            {
+                                user: {
+                                    email: {
+                                        contains: '@rgukts.ac.in',
+                                        mode: 'insensitive',
+                                    },
+                                },
+                            },
                         ],
                     });
                 }
 
                 if (body.productUuid) {
                     (where.AND as Prisma.ProductWhereInput[]).push({
-                        id: body.productUuid
+                        id: body.productUuid,
+                        OR: [
+                            {
+                                user: {
+                                    email: {
+                                        contains: '@rguktn.ac.in',
+                                        mode: 'insensitive',
+                                    },
+                                },
+                            },
+                            {
+                                user: {
+                                    email: {
+                                        contains: '@rgukts.ac.in',
+                                        mode: 'insensitive',
+                                    },
+                                },
+                            },
+                        ],
                     });
                 }
 
                 if (body.categoryUuid) {
                     (where.AND as Prisma.ProductWhereInput[]).push({
                         category: {
-                            id: body.categoryUuid
+                            id: body.categoryUuid,
                         },
+                        OR: [
+                            {
+                                user: {
+                                    email: {
+                                        contains: '@rguktn.ac.in',
+                                        mode: 'insensitive',
+                                    },
+                                },
+                            },
+                            {
+                                user: {
+                                    email: {
+                                        contains: '@rgukts.ac.in',
+                                        mode: 'insensitive',
+                                    },
+                                },
+                            },
+                        ],
                     });
                 }
 
@@ -257,26 +358,62 @@ export const productService = {
 
                 // Fetch total count for pagination metadata
                 totalCount = await prisma.product.count({ where });
-            }
-            else {
-                products = await prisma.$queryRaw`SELECT * FROM "products" WHERE "user_id" != ${userId} ORDER BY RANDOM() LIMIT 10`;
-                totalCount = await prisma.product.count({ where: { userId: { not: userId } } });
+            } else {
+                products = await prisma.$queryRaw`
+                    SELECT * 
+                    FROM "products" p
+                    JOIN "users" u ON p."user_id" = u."user_id"
+                    WHERE p."user_id" != ${userId}
+                    AND (u."email" ILIKE '%@rguktn.ac.in%' OR u."email" ILIKE '%@rgukts.ac.in%')
+                    ORDER BY RANDOM() 
+                    LIMIT 10;
+                `;
+
+                totalCount = await prisma.product.count({
+                    where: {
+                        userId: { not: userId },
+                        OR: [
+                            {
+                                user: {
+                                    email: {
+                                        contains: '@rguktn.ac.in',
+                                        mode: 'insensitive',
+                                    },
+                                },
+                            },
+                            {
+                                user: {
+                                    email: {
+                                        contains: '@rgukts.ac.in',
+                                        mode: 'insensitive',
+                                    },
+                                },
+                            },
+                        ],
+                    },
+                });
             }
 
             const formattedProducts: IProduct[] = products.map(
                 (product: any) => ({
                     id: product.id,
-                    productId: body.isFilter ? product.productId : product.product_id,
-                    productName: body.isFilter ? product.productName : product.product_name,
+                    productId: body.isFilter
+                        ? product.productId
+                        : product.product_id,
+                    productName: body.isFilter
+                        ? product.productName
+                        : product.product_name,
                     description: product.description,
                     amount: product.amount,
-                    categoryId: body.isFilter ? product.categoryId : product.category_id,
+                    categoryId: body.isFilter
+                        ? product.categoryId
+                        : product.category_id,
                     userId: body.isFilter ? product.userId : product.user_id,
                     images: product.images,
                     condition: product.condition,
                     brand: product.brand,
                     color: product.color,
-                    size: product.size
+                    size: product.size,
                 }),
             );
 
@@ -287,7 +424,7 @@ export const productService = {
                     totalPages: Math.ceil(totalCount / pageSize),
                     currentPage: pageNumber,
                 },
-            }
+            };
         } catch (error) {
             logger.error('Error fetching all products:', error);
             throw error;
@@ -295,18 +432,30 @@ export const productService = {
     },
 
     searchSuggestions: async (searchQuery: string) => {
-
         try {
             const suggestions = await prisma.product.findMany({
                 where: {
                     OR: [
-                        { productName: { contains: searchQuery, mode: 'insensitive' } },
-                        { description: { contains: searchQuery, mode: 'insensitive' } },
+                        {
+                            productName: {
+                                contains: searchQuery,
+                                mode: 'insensitive',
+                            },
+                        },
+                        {
+                            description: {
+                                contains: searchQuery,
+                                mode: 'insensitive',
+                            },
+                        },
                         {
                             category: {
-                                categoryName: { contains: searchQuery, mode: 'insensitive' }
-                            }
-                        }
+                                categoryName: {
+                                    contains: searchQuery,
+                                    mode: 'insensitive',
+                                },
+                            },
+                        },
                     ],
                 },
                 select: {
@@ -316,13 +465,20 @@ export const productService = {
                 take: 10,
             });
 
-            return suggestions
-
+            return suggestions;
         } catch (error: any) {
-            logger.error(
-                `Error fetching suggestions ${searchQuery}:`,
-                error,
-            );
+            logger.error(`Error fetching suggestions ${searchQuery}:`, error);
+            throw error;
+        }
+    },
+
+    getNotifications: async () => {
+        try {
+            const notifications: INotifications[] =
+                await prisma.notifications.findMany();
+            return notifications;
+        } catch (error) {
+            logger.error(`Error fetching notifications`, error);
             throw error;
         }
     },

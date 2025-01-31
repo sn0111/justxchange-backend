@@ -11,9 +11,10 @@ import {
 export const userController = {
     sendOtpToUser: async (req: Request, res: Response, next: NextFunction) => {
         try {
-            await mobileNumberSchema.validateAsync(req.params);
+            await mobileNumberSchema.validateAsync(req.body);
             const messageId = await userService.sendOtpToUser(
-                req.params.mobileNumber,
+                req.body.signUpValue,
+                req.body.emailOrSms,
             );
             res.json({ data: { messageId } });
         } catch (err) {
@@ -22,8 +23,8 @@ export const userController = {
     },
 
     verifyOtp: async (req: Request, res: Response, next: NextFunction) => {
-        await otpVerifySchema.validateAsync(req.body);
         try {
+            await otpVerifySchema.validateAsync(req.body);
             const verifyOtp = await userService.verifyOtp(req.body);
             res.json({ data: { verifyOtp } });
         } catch (err) {

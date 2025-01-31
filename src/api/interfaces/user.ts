@@ -1,7 +1,8 @@
 export interface IVerifyOtp {
-    mobileNumber: string;
+    signUpValue: string;
     otp: string;
     lastLoginOtp: string;
+    emailOrSms: string;
 }
 
 export interface IUser {
@@ -11,11 +12,14 @@ export interface IUser {
     password: string;
     mobileNumber: string;
     college: string;
+    emailOrSms: string;
 }
 
 export interface IUserLoginIn {
     password: string;
+    email: string;
     mobileNumber: string;
+    emailOrSms: string;
 }
 
 export interface IUserProfile {

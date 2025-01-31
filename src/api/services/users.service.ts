@@ -10,42 +10,60 @@ import bcrypt from 'bcrypt';
 const prisma = new PrismaClient();
 
 export const userService = {
-    sendOtpToUser: async (mobileNumber: string) => {
+    sendOtpToUser: async (signUpValue: string, emailOrSms: string) => {
         try {
             let user = await prisma.user.findUnique({
-                where: { mobileNumber },
+                where: {
+                    ...(emailOrSms === 'SMS'
+                        ? { mobileNumber: signUpValue }
+                        : { email: signUpValue }),
+                },
             });
+
             const { otp, otpExpiry } = generateOtpFormats();
             if (!user) {
                 user = await prisma.user.create({
                     data: {
-                        mobileNumber,
+                        ...(emailOrSms === 'SMS'
+                            ? { mobileNumber: signUpValue }
+                            : { email: signUpValue }),
                         otp,
                         otpExpiry,
                     },
                 });
             } else {
                 await prisma.user.update({
-                    where: { mobileNumber },
+                    where: {
+                        ...(emailOrSms === 'SMS'
+                            ? { mobileNumber: signUpValue }
+                            : { email: signUpValue }),
+                    },
                     data: { otp, otpExpiry },
                 });
             }
 
-            const message = smsService.sendSms(mobileNumber, otp);
+            const message =
+                emailOrSms === 'SMS'
+                    ? smsService.sendSms(signUpValue, otp)
+                    : smsService.sendEmail(signUpValue, otp);
             console.log(`Message sent: ${message}`);
             return message;
         } catch (error) {
-            console.error('Error sending SMS:', error);
+            console.error('Error sending OTP:', error);
             throw error;
         }
     },
 
     verifyOtp: async (body: IVerifyOtp) => {
-        const { mobileNumber, otp, lastLoginOtp } = body;
+        const { signUpValue, otp, lastLoginOtp, emailOrSms } = body;
 
         try {
             const user = await prisma.user.findUnique({
-                where: { mobileNumber },
+                where: {
+                    ...(emailOrSms === 'SMS'
+                        ? { mobileNumber: signUpValue }
+                        : { email: signUpValue }),
+                },
             });
 
             if (!user) {
@@ -71,7 +89,11 @@ export const userService = {
             }
 
             await prisma.user.update({
-                where: { mobileNumber },
+                where: {
+                    ...(emailOrSms === 'SMS'
+                        ? { mobileNumber: signUpValue }
+                        : { email: signUpValue }),
+                },
                 data: {
                     mobileVerified: true,
                     otp: null,
@@ -97,7 +119,11 @@ export const userService = {
     saveUser: async (body: IUser) => {
         try {
             const user = await prisma.user.findUnique({
-                where: { mobileNumber: body.mobileNumber },
+                where: {
+                    ...(body.emailOrSms === 'SMS'
+                        ? { mobileNumber: body.mobileNumber }
+                        : { email: body.email }),
+                },
             });
 
             if (!user) {
@@ -109,14 +135,18 @@ export const userService = {
             }
             const hashedPassword = await hashPassword(body.password);
             await prisma.user.update({
-                where: { mobileNumber: body.mobileNumber },
+                where: {
+                    ...(body.emailOrSms === 'SMS'
+                        ? { mobileNumber: body.mobileNumber }
+                        : { email: body.email }),
+                },
                 data: {
                     firstName: body.firstName,
                     lastName: body.lastName,
                     college: body.college,
                     email: body.email,
                     password: hashedPassword,
-                    profileUrl: process.env.USER_PROFILE_URL
+                    profileUrl: process.env.USER_PROFILE_URL,
                 },
             });
 
@@ -132,7 +162,11 @@ export const userService = {
     loginUser: async (body: IUserLoginIn) => {
         try {
             const user = await prisma.user.findUnique({
-                where: { mobileNumber: body.mobileNumber },
+                where: {
+                    ...(body.emailOrSms === 'SMS'
+                        ? { mobileNumber: body.mobileNumber }
+                        : { email: body.email }),
+                },
             });
             const is2FAEnabled = user?.is2FAEnabled;
 
@@ -246,7 +280,7 @@ export const userService = {
                     college: body.college,
                     is2FAEnabled: body.is2FAEnabled,
                     profileUrl: body.profileUrl,
-                    isContactView: body.isContactView
+                    isContactView: body.isContactView,
                 },
             });
             const address = await prisma.address.findFirst({
