@@ -52,7 +52,7 @@ model User {
   userId            Int                 @id @default(autoincrement()) @map("user_id")
   firstName         String?             @map("first_name") @db.VarChar(50)
   lastName          String?             @map("last_name") @db.VarChar(50)
-  mobileNumber      String?              @unique @map("mobile_number") @db.VarChar(15)
+  mobileNumber      String?             @unique @map("mobile_number") @db.VarChar(15)
   emailVerified     Boolean             @default(false) @map("email_verified")
   mobileVerified    Boolean             @default(false) @map("mobile_verified")
   college           String?             @map("college_name") @db.VarChar(200)
@@ -175,14 +175,15 @@ model UserProductWishList {
 }
 
 model Notifications {
-  id           String   @unique @default(uuid()) @db.Uuid
-  notificationId    Int      @id @default(autoincrement()) @map("notification_id")
-  productId      String @map("product_id")
-  message String
-  userId       Int      @map("user_id")
-  createdDate  DateTime @default(now()) @map("created_date")
-  updatedDate  DateTime @default(now()) @map("updated_date")
-  isRead Boolean @default(false) @map("is_read")
+  id             String   @unique @default(uuid()) @db.Uuid
+  notificationId Int      @id @default(autoincrement()) @map("notification_id")
+  productId      String   @map("product_id")
+  productName    String   @default("") @map("product_name")
+  message        String
+  userId         Int      @map("user_id")
+  createdDate    DateTime @default(now()) @map("created_date")
+  updatedDate    DateTime @default(now()) @map("updated_date")
+  isRead         Boolean  @default(false) @map("is_read")
 
   @@map("notifications")
 }

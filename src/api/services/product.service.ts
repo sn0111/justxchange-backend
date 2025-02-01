@@ -25,6 +25,7 @@ export const productService = {
                         userId: user.userId,
                         message: `A new product "${newProduct.productName}" was added!`,
                         productId: newProduct.id,
+                        productName: newProduct.productName
                     },
                 });
                 // Send the notification to online users
@@ -479,6 +480,23 @@ export const productService = {
             return notifications;
         } catch (error) {
             logger.error(`Error fetching notifications`, error);
+            throw error;
+        }
+    },
+
+    udpateNotification: async (id: string) => {
+        try {
+            await prisma.notifications.update({
+                where: {
+                    id: id,
+                },
+                data: {
+                    isRead: true,
+                    updatedDate: new Date(),
+                },
+            });
+        } catch (error) {
+            logger.error(`Error update notifications`, error);
             throw error;
         }
     },

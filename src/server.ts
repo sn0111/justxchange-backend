@@ -145,13 +145,18 @@ io.on('connection', (socket) => {
 
     // Mark notifications as read
     socket.on('mark-as-read', async (notificationIds: string[]) => {
-        const notifications = await productService.getNotifications();
-        notificationIds.forEach((id) => {
-            const notification = notifications.find((n) => n.id === id);
-            if (notification) {
-                notification.isRead = true;
-            }
-        });
+        try {
+            const notifications = await productService.getNotifications();
+            notificationIds.forEach((id) => {
+                const notification = notifications.find((n) => n.id === id);
+                if (notification) {
+                    notification.isRead = true;
+                }
+                productService.udpateNotification(id)
+            });
+        } catch (error) {
+            logger.error(`Error update notifications`, error);
+        }
     });
 
     socket.on('disconnect', () => {
