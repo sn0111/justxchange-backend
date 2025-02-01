@@ -147,13 +147,19 @@ io.on('connection', (socket) => {
     socket.on('mark-as-read', async (notificationIds: string[]) => {
         try {
             const notifications = await productService.getNotifications();
+            let userId = 1;
             notificationIds.forEach((id) => {
                 const notification = notifications.find((n) => n.id === id);
                 if (notification) {
                     notification.isRead = true;
+                    userId = notification.userId;
                 }
                 productService.udpateNotification(id)
             });
+            const filterNotifications = notifications.filter(
+                (n) => n.userId === Number(userId) && !n.isRead,
+            );
+            socket.emit('unread-notifications', filterNotifications);
         } catch (error) {
             logger.error(`Error update notifications`, error);
         }

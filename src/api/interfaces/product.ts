@@ -25,6 +25,7 @@ export interface IProductFilters {
 export interface INotifications {
     id: string;
     notificationId: number;
+    productName: string;
     productId: string;
     message: string;
     userId: number;
