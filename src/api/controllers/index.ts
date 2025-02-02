@@ -4,7 +4,7 @@ import { favoriteController } from './favourites.controller';
 import imageController from './image.controller';
 import { productController } from './product.controller';
 import { userController } from './users.controller';
-import { auditLogsController } from './auditlogs.controller';
+import { auditLogsController } from './auditLogs.controller';
 
 export {
     categoryController,
@@ -13,5 +13,5 @@ export {
     chatController,
     favoriteController,
     userController,
-    auditLogsController
+    auditLogsController,
 };
