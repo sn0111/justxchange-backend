@@ -141,6 +141,7 @@ export const userService = {
                         : { email: body.email }),
                 },
                 data: {
+                    mobileNumber: body.mobileNumber,
                     firstName: body.firstName,
                     lastName: body.lastName,
                     college: body.college,

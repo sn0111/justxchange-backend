@@ -10,10 +10,11 @@ import { verifyToken } from './api/services/auth.service';
 import { exceptionMsger } from './api/utils/exceptionMsger';
 import { errorHandler } from './api/utils/errorHandler';
 import { chatService, productService } from './api/services';
-import { INotifications } from './api/interfaces/product';
+import { PrismaClient } from '@prisma/client';
 
 // const swaggerDocument = require('./api/docs/swagger-output.json');
 const swaggerUi = require('swagger-ui-express');
+const prisma = new PrismaClient();
 
 declare global {
     namespace Express {
@@ -80,12 +81,29 @@ app.use((req, res, next) => {
     }
 });
 // Middleware to log response body
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
     const originalSend = res.send;
     res.send = function (body) {
-        console.log(`Response for ${req.method} ${req.originalUrl}:`, body);
+        console.log(`Response for ${req.user?.userId} ${req.method} ${req.originalUrl}:`, body);
         return originalSend.apply(res, [body]);
     };
+
+    const action = `${req.method} ${req.originalUrl}`;
+    const ipAddress: string = req.ip || "Unknown";
+    const userAgent = req.headers["user-agent"] || "Unknown";
+    const platform = req.headers["sec-ch-ua-platform"];
+    const mobile = req.headers["sec-ch-ua-mobile"];
+    console.log(mobile)
+    await prisma.auditLog.create({
+        data: {
+            userId: Number(req.user?.userId) || 0,
+            action,
+            platform: typeof platform === 'object' && Array.isArray(platform) ? platform[0] : platform,
+            isMobile: typeof mobile === 'object' && Array.isArray(mobile) ? mobile[0] : mobile,
+            ipAddress,
+            userAgent,
+        }
+    });
     next();
 });
 // Routes

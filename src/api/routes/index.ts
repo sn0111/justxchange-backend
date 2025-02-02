@@ -3,6 +3,7 @@ import categoryRoutes from './category.routes';
 import productRoutes from './product.routes';
 import imageRoutes from './image.routes';
 import chatRoutes from './chats.routes';
+import auditLogRoutes from './auditLogs.routes';
 import favouriteRoutes from './favourites.routes';
 import userRoutes from './user.routes';
 import { attachSwaggerResponses } from '../../middleware/response';
@@ -21,7 +22,7 @@ router.use(categoryRoutes /* #swagger.tags = ['Category']  */);
 router.use(imageRoutes /* #swagger.tags = ['Image'] */);
 router.use(favouriteRoutes /* #swagger.tags = ['Favourites'] */);
 router.use(userRoutes /* #swagger.tags = ['Users'] */);
-
+router.use(auditLogRoutes /* #swagger.tags = ['AuditLogs'] */);
 // Routes with specific "Role" authorization
 router.use(
     '/products',

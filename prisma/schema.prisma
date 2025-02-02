@@ -187,3 +187,17 @@ model Notifications {
 
   @@map("notifications")
 }
+
+model AuditLog {
+  id        String   @unique @default(uuid()) @db.Uuid
+  logId     Int      @id @default(autoincrement()) @map("log_id")
+  userId    Int
+  action    String
+  platform  String?
+  isMobile  String?
+  timestamp DateTime @default(now())
+  ipAddress String?
+  userAgent String?
+
+  @@map("audit_logs")
+}
