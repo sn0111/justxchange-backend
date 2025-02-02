@@ -64,7 +64,6 @@
         "@types/winston": "^2.4.4",
         "eslint-config-prettier": "^9.1.0",
         "eslint-plugin-prettier": "^5.2.1",
-        "nodemailer": "^6.10.0",
         "nodemon": "^3.1.7",
         "prisma": "^5.20.0",
         "ts-node": "^10.9.2",
