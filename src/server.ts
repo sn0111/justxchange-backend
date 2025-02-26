@@ -84,25 +84,34 @@ app.use((req, res, next) => {
 app.use(async (req, res, next) => {
     const originalSend = res.send;
     res.send = function (body) {
-        console.log(`Response for ${req.user?.userId} ${req.method} ${req.originalUrl}:`, body);
+        console.log(
+            `Response for ${req.user?.userId} ${req.method} ${req.originalUrl}:`,
+            body,
+        );
         return originalSend.apply(res, [body]);
     };
 
     const action = `${req.method} ${req.originalUrl}`;
-    const ipAddress: string = req.ip || "Unknown";
-    const userAgent = req.headers["user-agent"] || "Unknown";
-    const platform = req.headers["sec-ch-ua-platform"];
-    const mobile = req.headers["sec-ch-ua-mobile"];
-    console.log(mobile)
+    const ipAddress: string = req.ip || 'Unknown';
+    const userAgent = req.headers['user-agent'] || 'Unknown';
+    const platform = req.headers['sec-ch-ua-platform'];
+    const mobile = req.headers['sec-ch-ua-mobile'];
+    console.log(mobile);
     await prisma.auditLog.create({
         data: {
             userId: Number(req.user?.userId) || 0,
             action,
-            platform: typeof platform === 'object' && Array.isArray(platform) ? platform[0] : platform,
-            isMobile: typeof mobile === 'object' && Array.isArray(mobile) ? mobile[0] : mobile,
+            platform:
+                typeof platform === 'object' && Array.isArray(platform)
+                    ? platform[0]
+                    : platform,
+            isMobile:
+                typeof mobile === 'object' && Array.isArray(mobile)
+                    ? mobile[0]
+                    : mobile,
             ipAddress,
             userAgent,
-        }
+        },
     });
     next();
 });
@@ -172,7 +181,7 @@ io.on('connection', (socket) => {
                     notification.isRead = true;
                     userId = notification.userId;
                 }
-                productService.udpateNotification(id)
+                productService.udpateNotification(id);
             });
             const filterNotifications = notifications.filter(
                 (n) => n.userId === Number(userId) && !n.isRead,
@@ -181,6 +190,53 @@ io.on('connection', (socket) => {
         } catch (error) {
             logger.error(`Error update notifications`, error);
         }
+    });
+
+    socket.on('typing', ({ chatId, userId }) => {
+        socket.to(chatId).emit('userTyping', { chatId, userId });
+    });
+
+    socket.on('stopTyping', ({ chatId, userId }) => {
+        socket.to(chatId).emit('userStoppedTyping', { chatId, userId });
+    });
+
+    socket.on('setOnline', ({ userId }) => {
+        // onlineUsers[userId] = true;
+        io.emit('userOnlineStatus', { userId, status: 'online' });
+    });
+
+    socket.on('setOffline', ({ userId }) => {
+        // onlineUsers[userId] = true;
+        io.emit('userOnlineStatus', { userId, status: 'offline' });
+        console.log(`User ${userId} went offline.`);
+    });
+
+    socket.on('user-disconnect', async (data) => {
+        console.log(data);
+        const chat = await prisma.chat.findUnique({
+            where: {
+                id: data.chat,
+            },
+        });
+        if (chat) {
+            if (data.isOwner) {
+                chat.buyerLastSeen = new Date();
+            } else {
+                chat.userLastSeen = new Date();
+            }
+            await prisma.chat.update({
+                where: { id: data.chat },
+                data: {
+                    buyerLastSeen: data.isOwner
+                        ? new Date()
+                        : chat.buyerLastSeen,
+                    userLastSeen: !data.isOwner
+                        ? new Date()
+                        : chat.userLastSeen,
+                },
+            });
+        }
+        console.log(`User ${data.userId} is disconnecting`);
     });
 
     socket.on('disconnect', () => {

@@ -145,6 +145,8 @@ model Chat {
   product     Product   @relation(fields: [productId], references: [productId])
   buyer       User      @relation(fields: [buyerId], references: [userId])
   message     Message[]
+  buyerLastSeen DateTime  @default(now()) @map("buyer_last_seen")
+  userLastSeen  DateTime  @default(now()) @map("user_last_seen")
 
   @@map("chats")
 }

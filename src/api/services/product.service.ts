@@ -25,7 +25,7 @@ export const productService = {
                         userId: user.userId,
                         message: `A new product "${newProduct.productName}" was added!`,
                         productId: newProduct.id,
-                        productName: newProduct.productName
+                        productName: newProduct.productName,
                     },
                 });
                 // Send the notification to online users
@@ -361,7 +361,7 @@ export const productService = {
                 totalCount = await prisma.product.count({ where });
             } else {
                 products = await prisma.$queryRaw`
-                    SELECT * 
+                    SELECT p.* 
                     FROM "products" p
                     JOIN "users" u ON p."user_id" = u."user_id"
                     WHERE p."user_id" != ${userId}
